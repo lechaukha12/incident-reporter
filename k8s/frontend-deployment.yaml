@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: lechaukha12/incident-reporter-frontend:v1.4
+        image: lechaukha12/incident-reporter-frontend:fixed
         ports:
         - containerPort: 80
         readinessProbe:
@@ -47,4 +47,4 @@ spec:
   ports:
   - port: 80
     targetPort: 80
-  type: LoadBalancer
+  type: ClusterIP
