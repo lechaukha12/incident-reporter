@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: lechaukha12/incident-reporter-frontend:fixed
+        image: lechaukha12/incident-reporter-frontend:fixed-v2
         ports:
         - containerPort: 80
         readinessProbe:
