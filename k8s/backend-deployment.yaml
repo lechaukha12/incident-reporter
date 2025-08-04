@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: lechaukha12/incident-reporter-backend:fixed-final-v2
+        image: lechaukha12/incident-reporter-backend:v1.1
         ports:
         - containerPort: 8080
         env:

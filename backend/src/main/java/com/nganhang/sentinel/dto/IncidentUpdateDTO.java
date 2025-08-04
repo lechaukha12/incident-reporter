@@ -19,4 +19,8 @@ public class IncidentUpdateDTO {
     private String assignee;
     
     private boolean resolved;
+    
+    private String notes;
+    
+    private String rootCause;
 }

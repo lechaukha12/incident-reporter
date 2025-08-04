@@ -29,4 +29,8 @@ public class IncidentCreateDTO {
     
     @NotBlank(message = "Người báo cáo không được để trống")
     private String reportedBy;
+    
+    private String notes;
+    
+    private String rootCause;
 }

@@ -51,6 +51,12 @@ public class Incident {
 
     @Column(name = "is_resolved")
     private boolean resolved;
+    
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+    
+    @Column(name = "root_cause", columnDefinition = "TEXT")
+    private String rootCause;
 
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;

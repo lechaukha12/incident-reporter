@@ -38,6 +38,8 @@ public class IncidentService {
                 .affectedService(dto.getAffectedService())
                 .assignee(dto.getAssignee())
                 .reportedBy(dto.getReportedBy())
+                .notes(dto.getNotes())
+                .rootCause(dto.getRootCause())
                 .resolved(false)
                 .build();
         
@@ -175,6 +177,15 @@ public class IncidentService {
             }
         }
         
+        // Cập nhật notes và rootCause nếu có
+        if (dto.getNotes() != null) {
+            incident.setNotes(dto.getNotes());
+        }
+        
+        if (dto.getRootCause() != null) {
+            incident.setRootCause(dto.getRootCause());
+        }
+        
         Incident updatedIncident = incidentRepository.save(incident);
         List<IncidentUpdate> updates = incidentUpdateRepository.findByIncidentOrderByCreatedAtDesc(updatedIncident);
         
@@ -224,6 +235,8 @@ public class IncidentService {
                 .resolvedAt(incident.getResolvedAt())
                 .createdAt(incident.getCreatedAt())
                 .updatedAt(incident.getUpdatedAt())
+                .notes(incident.getNotes())
+                .rootCause(incident.getRootCause())
                 .timeline(timelineUpdates)
                 .build();
     }

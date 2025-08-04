@@ -28,6 +28,8 @@ public class IncidentResponseDTO {
     private LocalDateTime resolvedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String notes;
+    private String rootCause;
     private List<IncidentUpdateResponseDTO> timeline;
     
     @Data
