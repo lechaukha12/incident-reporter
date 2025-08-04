@@ -145,6 +145,14 @@ public class IncidentService {
         // Cập nhật thông tin sự cố
         if (dto.getStatus() != null) {
             incident.setStatus(dto.getStatus());
+            // Tự động cập nhật trạng thái resolved dựa trên status
+            if (dto.getStatus() == Incident.IncidentStatus.RESOLVED) {
+                incident.setResolved(true);
+                incident.setResolvedAt(LocalDateTime.now());
+            } else {
+                incident.setResolved(false);
+                incident.setResolvedAt(null);
+            }
         }
         
         if (dto.getSeverityLevel() != null) {
@@ -155,13 +163,16 @@ public class IncidentService {
             incident.setAssignee(dto.getAssignee());
         }
         
-        if (resolvedChanged && dto.isResolved()) {
-            incident.setResolved(true);
-            incident.setResolvedAt(LocalDateTime.now());
-            incident.setStatus(Incident.IncidentStatus.RESOLVED);
-        } else if (resolvedChanged) {
-            incident.setResolved(false);
-            incident.setResolvedAt(null);
+        // Xử lý trường hợp cập nhật trực tiếp trường resolved (nếu có)
+        if (resolvedChanged && dto.getStatus() == null) {
+            if (dto.isResolved()) {
+                incident.setResolved(true);
+                incident.setResolvedAt(LocalDateTime.now());
+                incident.setStatus(Incident.IncidentStatus.RESOLVED);
+            } else {
+                incident.setResolved(false);
+                incident.setResolvedAt(null);
+            }
         }
         
         Incident updatedIncident = incidentRepository.save(incident);

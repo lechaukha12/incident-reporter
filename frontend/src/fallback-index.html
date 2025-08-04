@@ -642,16 +642,9 @@
         // Update incident
         function updateIncident(event) {
             event.preventDefault();
-            console.log('updateIncident function called');
-            alert('updateIncident function called'); // Debug alert
             
             const id = document.getElementById('editId').value;
-            console.log('Incident ID:', id);
-            alert('Incident ID: ' + id); // Debug alert
-            
             const severityValue = document.getElementById('editSeverityLevel').value;
-            console.log('Severity value:', severityValue);
-            alert('Severity value: ' + severityValue); // Debug alert
             
             // Chỉ gửi các trường IncidentUpdateDTO cần
             const updatedIncident = {
