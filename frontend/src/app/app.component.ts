@@ -54,7 +54,7 @@ export class AppComponent implements OnInit {
     title: '',
     description: '',
     status: 'INVESTIGATING',
-    severityLevel: 'SEV2',
+    severityLevel: 'HIGH',
     affectedService: '',
     reportedBy: ''
   };
@@ -69,10 +69,10 @@ export class AppComponent implements OnInit {
   ];
   
   severityLevels = [
-    { label: 'SEV1 - Nghiêm trọng', value: 'SEV1' },
-    { label: 'SEV2 - Cao', value: 'SEV2' },
-    { label: 'SEV3 - Trung bình', value: 'SEV3' },
-    { label: 'SEV4 - Thấp', value: 'SEV4' }
+    { label: 'Nghiêm trọng', value: 'CRITICAL' },
+    { label: 'Cao', value: 'HIGH' },
+    { label: 'Trung bình', value: 'MEDIUM' },
+    { label: 'Thấp', value: 'LOW' }
   ];
   
   statuses = [
@@ -292,10 +292,10 @@ export class AppComponent implements OnInit {
 
   getSeverityColor(severity: string): string {
     switch (severity) {
-      case 'SEV1': return 'red';
-      case 'SEV2': return 'orange';
-      case 'SEV3': return 'gold';
-      case 'SEV4': return 'green';
+      case 'CRITICAL': return 'red';
+      case 'HIGH': return 'orange';
+      case 'MEDIUM': return 'gold';
+      case 'LOW': return 'green';
       default: return 'blue';
     }
   }
