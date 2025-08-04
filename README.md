@@ -6,41 +6,43 @@ Một ứng dụng web nội bộ giúp ghi nhận, theo dõi và quản lý cá
 
 ### Vấn đề
 
-Tại môi trường microservices phức tạp của ứng dụng mobile banking, việc xử lý sự cố đang gặp các thách thức:
+Hệ thống OPS của ngân hàng đang đối mặt với những thách thức trong việc quản lý và theo dõi sự cố:
 
-- **Phản ứng chậm**: Sự cố chỉ được phát hiện khi có người dùng phàn nàn hoặc DevOps phải truy vấn log/trace thủ công.
+- **Thiếu tập trung**: Thông tin sự cố phân tán qua nhiều nền tảng (chat, email, ticket) gây khó khăn trong việc theo dõi và điều phối.
 
-- **Quy trình rời rạc**: Thông tin về sự cố bị phân tán qua nhiều kênh chat, không có một nơi ghi nhận tập trung.
+- **Phát hiện chậm**: Nhiều sự cố chỉ được phát hiện sau khi đã ảnh hưởng đến khách hàng, khi người dùng báo cáo vấn đề qua các kênh hỗ trợ.
 
-- **Mất thời gian**: Đội ngũ tốn nhiều thời gian để tìm hiểu "chuyện gì đã xảy ra" thay vì tập trung vào việc khắc phục.
+- **Khó theo dõi tiến độ**: Không có công cụ thống nhất để theo dõi trạng thái xử lý sự cố từ khi phát hiện đến khi giải quyết.
 
-- **Khó rút kinh nghiệm**: Không có dữ liệu lịch sử để phân tích, tìm ra nguyên nhân gốc rễ và ngăn ngừa các sự cố tương tự trong tương lai.
+- **Báo cáo không đồng nhất**: Thiếu chuẩn hóa trong việc phân loại mức độ nghiêm trọng và ghi nhận diễn biến xử lý sự cố.
 
 ### Mục tiêu
 
-Dự án Hệ thống Tuning OPS được xây dựng để giải quyết các vấn đề trên, với mục tiêu:
+Hệ thống Tuning OPS được xây dựng để cải thiện quy trình quản lý sự cố với các mục tiêu cụ thể:
 
-- Tập trung hóa toàn bộ thông tin về sự cố vào một nơi duy nhất.
+- **Tạo nền tảng tập trung**: Xây dựng một nền tảng duy nhất để ghi nhận, quản lý và theo dõi toàn bộ sự cố kỹ thuật.
 
-- Tự động hóa việc tạo sự cố ngay khi hệ thống giám sát phát hiện dấu hiệu bất thường.
+- **Chuẩn hóa quy trình**: Áp dụng quy trình xử lý sự cố chuẩn với 4 trạng thái rõ ràng (Đang điều tra → Đã xác định → Đang theo dõi → Đã giải quyết).
 
-- Chuẩn hóa quy trình xử lý sự cố từ lúc phát hiện đến khi giải quyết xong.
+- **Phân loại hiệu quả**: Phân loại sự cố theo mức độ nghiêm trọng (SEV1 đến SEV4) để ưu tiên nguồn lực xử lý hợp lý.
 
-- Cung cấp dữ liệu để phân tích và cải tiến, giảm thiểu thời gian khắc phục (MTTR) và tăng độ ổn định cho hệ thống.
+- **Lưu trữ lịch sử**: Ghi lại đầy đủ tiến trình xử lý, các quyết định và hành động thông qua hệ thống timeline.
+
+- **Hỗ trợ ra quyết định**: Cung cấp thống kê và báo cáo để giúp đội ngũ kỹ thuật đánh giá hiệu quả xử lý sự cố và cải thiện quy trình.
 
 ## ✨ Các tính năng cốt lõi
 
-- **Quản lý Incident Toàn diện**: Tạo, cập nhật, phân công và theo dõi incident theo vòng đời (Investigating -> Identified -> Monitoring -> Resolved).
+- **Dashboard tổng quan**: Hiển thị thống kê tổng số sự cố, số sự cố đang hoạt động và đã giải quyết.
 
-- **Phân loại theo Mức độ**: Gán mức độ nghiêm trọng (Severity Level SEV1 -> SEV4) để ưu tiên xử lý.
+- **Quản lý sự cố toàn diện**: Cho phép tạo, cập nhật và theo dõi các sự cố với đầy đủ thông tin (tiêu đề, mô tả, trạng thái, mức độ nghiêm trọng, người phụ trách).
 
-- **Nhật ký hành động (Timeline)**: Ghi lại toàn bộ diễn biến, quyết định và hành động xử lý theo thời gian thực.
+- **Phân loại sự cố**: Hỗ trợ phân loại theo mức độ nghiêm trọng (SEV1 - Nghiêm trọng, SEV2 - Cao, SEV3 - Trung bình, SEV4 - Thấp).
 
-- **Tự động tạo Incident**: Tích hợp với hệ thống cảnh báo (Grafana, Prometheus) qua Webhook để tự động tạo incident.
+- **Quản lý trạng thái**: Theo dõi sự cố qua các trạng thái (Đang điều tra, Đã xác định, Đang theo dõi, Đã giải quyết).
 
-- **Thông báo tức thì**: Tích hợp với Slack/Teams để gửi thông báo về các cập nhật quan trọng của incident đến kênh chat tương ứng.
+- **Timeline cập nhật**: Ghi lại lịch sử các hành động và cập nhật cho mỗi sự cố theo thời gian.
 
-- **Giao diện trực quan**: Dashboard hiển thị danh sách incident, cho phép lọc và tìm kiếm dễ dàng.
+- **Giao diện thân thiện**: Thiết kế trực quan, dễ sử dụng với cả phiên bản web đơn giản và phiên bản đầy đủ.
 
 ## 🛠️ Ngăn xếp Công nghệ (Tech Stack)
 
