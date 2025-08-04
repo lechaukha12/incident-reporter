@@ -36,7 +36,7 @@ public class IncidentControllerIntegrationTest {
         IncidentCreateDTO createDTO = new IncidentCreateDTO();
         createDTO.setTitle("Test Incident");
         createDTO.setDescription("Test Description");
-        createDTO.setSeverityLevel(Incident.SeverityLevel.SEV2);
+        createDTO.setSeverityLevel(Incident.SeverityLevel.HIGH);
         createDTO.setAffectedService("Test Service");
         createDTO.setReportedBy("Test User");
 
@@ -70,14 +70,14 @@ public class IncidentControllerIntegrationTest {
         // 3. Cập nhật trạng thái sự cố
         IncidentUpdateDTO incidentUpdateDTO = new IncidentUpdateDTO();
         incidentUpdateDTO.setStatus(Incident.IncidentStatus.IDENTIFIED);
-        incidentUpdateDTO.setSeverityLevel(Incident.SeverityLevel.SEV1);
+        incidentUpdateDTO.setSeverityLevel(Incident.SeverityLevel.CRITICAL);
 
         mockMvc.perform(put("/api/incidents/{id}", incidentId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(incidentUpdateDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("IDENTIFIED")))
-                .andExpect(jsonPath("$.severityLevel", is("SEV1")));
+                .andExpect(jsonPath("$.severityLevel", is("CRITICAL")));
 
         // 4. Lấy danh sách tất cả sự cố
         mockMvc.perform(get("/api/incidents"))

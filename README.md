@@ -24,7 +24,7 @@ Hệ thống Tuning OPS được xây dựng để cải thiện quy trình qu�
 
 - **Chuẩn hóa quy trình**: Áp dụng quy trình xử lý sự cố chuẩn với 4 trạng thái rõ ràng (Đang điều tra → Đã xác định → Đang theo dõi → Đã giải quyết).
 
-- **Phân loại hiệu quả**: Phân loại sự cố theo mức độ nghiêm trọng (SEV1 đến SEV4) để ưu tiên nguồn lực xử lý hợp lý.
+- **Phân loại hiệu quả**: Phân loại sự cố theo mức độ nghiêm trọng (Nghiêm trọng, Cao, Trung bình, Thấp) để ưu tiên nguồn lực xử lý hợp lý.
 
 - **Lưu trữ lịch sử**: Ghi lại đầy đủ tiến trình xử lý, các quyết định và hành động thông qua hệ thống timeline.
 
@@ -36,11 +36,17 @@ Hệ thống Tuning OPS được xây dựng để cải thiện quy trình qu�
 
 - **Quản lý sự cố toàn diện**: Cho phép tạo, cập nhật và theo dõi các sự cố với đầy đủ thông tin (tiêu đề, mô tả, trạng thái, mức độ nghiêm trọng, người phụ trách).
 
-- **Phân loại sự cố**: Hỗ trợ phân loại theo mức độ nghiêm trọng (SEV1 - Nghiêm trọng, SEV2 - Cao, SEV3 - Trung bình, SEV4 - Thấp).
+- **Phân loại sự cố**: Hỗ trợ phân loại theo mức độ nghiêm trọng với 4 cấp độ rõ ràng:
+  - **CRITICAL** (Nghiêm trọng): Ảnh hưởng đến nhiều người dùng
+  - **HIGH** (Cao): Vấn đề chức năng quan trọng
+  - **MEDIUM** (Trung bình): Vấn đề chức năng nhỏ  
+  - **LOW** (Thấp): Tác động tối thiểu
 
 - **Quản lý trạng thái**: Theo dõi sự cố qua các trạng thái (Đang điều tra, Đã xác định, Đang theo dõi, Đã giải quyết).
 
 - **Timeline cập nhật**: Ghi lại lịch sử các hành động và cập nhật cho mỗi sự cố theo thời gian.
+
+- **Chỉnh sửa sự cố**: Giao diện modal hiện đại cho phép chỉnh sửa hoàn chỉnh thông tin sự cố, bao gồm cập nhật mức độ nghiêm trọng với dropdown menu trực quan.
 
 - **Giao diện thân thiện**: Thiết kế trực quan, dễ sử dụng với cả phiên bản web đơn giản và phiên bản đầy đủ.
 
@@ -101,7 +107,41 @@ incident-reporter/
 - **POST /api/incidents/{id}/updates**: Thêm một ghi nhận mới vào timeline của incident.
 - **GET /api/incidents/stats**: Lấy thống kê tổng quan về các sự cố.
 
-## 🚀 Bắt đầu Nhanh (Getting Started)
+## � Trạng thái Hệ thống
+
+### ✅ Tính năng đã triển khai và hoạt động:
+
+1. **Hệ thống phân loại mức độ nghiêm trọng mới**: 
+   - Backend hoàn toàn sử dụng enum CRITICAL/HIGH/MEDIUM/LOW
+   - Frontend hiển thị và gửi trực tiếp các giá trị enum mới
+   - Loại bỏ hoàn toàn hệ thống SEV1-SEV4 cũ
+
+2. **Chức năng chỉnh sửa sự cố**:
+   - Modal edit với giao diện thân thiện
+   - API PUT endpoint hoạt động hoàn hảo
+   - Cập nhật được tất cả thông tin: title, description, status, severity, assignee
+
+3. **API REST hoàn chỉnh**:
+   - POST /api/incidents - Tạo incident mới ✅
+   - GET /api/incidents - Lấy danh sách incidents ✅  
+   - GET /api/incidents/{id} - Lấy chi tiết incident ✅
+   - PUT /api/incidents/{id} - Cập nhật incident ✅
+   - POST /api/incidents/{id}/updates - Thêm timeline update ✅
+
+4. **Containerization hoàn chỉnh**:
+   - Backend: Java Spring Boot container ✅
+   - Frontend: Nginx container với HTML/JS ✅  
+   - Database: PostgreSQL container ✅
+   - Tất cả services đã rebuild và hoạt động với enum mới
+
+### 🔧 Cần cải thiện trong tương lai:
+
+- Giao diện Angular để thay thế HTML/JS
+- Hệ thống thông báo real-time
+- Dashboard analytics nâng cao
+- Export báo cáo PDF/Excel
+
+## �🚀 Bắt đầu Nhanh (Getting Started)
 
 ### Yêu cầu:
 
@@ -124,7 +164,7 @@ incident-reporter/
    Lệnh này sẽ build các images và khởi chạy tất cả các services (frontend, backend, db).
 
 3. **Truy cập ứng dụng:**
-   - Frontend: http://localhost:4200
+   - Frontend: http://localhost:4200 (Simple HTML/JS interface)
    - Backend API: http://localhost:8080
    - API Test: http://localhost:4200/api-test.html
 
@@ -134,12 +174,13 @@ incident-reporter/
 
 Frontend có hai phiên bản triển khai:
 
-1. **Phiên bản HTML/JS với Nginx (mặc định):**
+1. **Phiên bản HTML/JS với Nginx (mặc định - đang sử dụng):**
    - Sử dụng `Dockerfile.nginx` để build
    - Phục vụ trên port 4200
    - Đơn giản, nhẹ nhàng và dễ triển khai
+   - Giao diện fallback-index.html với modal edit hoàn chỉnh
 
-2. **Phiên bản Angular (tùy chọn):**
+2. **Phiên bản Angular (tùy chọn - chưa triển khai):**
    - Sử dụng `Dockerfile` để build
    - Yêu cầu Node.js để phát triển
    - Cung cấp trải nghiệm người dùng phong phú hơn
@@ -163,12 +204,50 @@ Dự án bao gồm các công cụ kiểm thử:
 - **api-test.html**: Trang kiểm tra kết nối API đơn giản
 - **api-test-standalone.html**: Công cụ kiểm tra API độc lập
 - **connection-test.html**: Kiểm tra kết nối giữa frontend và backend
+- **test-api.sh**: Script tự động kiểm tra các API endpoint (tạo, đọc, cập nhật sự cố và timeline)
+  ```bash
+  # Chạy script kiểm tra API
+  ./test-api.sh
+  ```
+
+### Kiểm tra chức năng mới:
+
+1. **Test severity levels mới**:
+   ```bash
+   # Tạo incident với CRITICAL severity
+   curl -X POST http://localhost:8080/api/incidents \
+     -H "Content-Type: application/json" \
+     -d '{"title":"Test Critical","severityLevel":"CRITICAL","status":"INVESTIGATING"}'
+   ```
+
+2. **Test chức năng edit**:
+   ```bash
+   # Cập nhật incident
+   curl -X PUT http://localhost:8080/api/incidents/1 \
+     -H "Content-Type: application/json" \
+     -d '{"severityLevel":"HIGH","status":"RESOLVED","assignee":"Admin"}'
+   ```
 
 Trong thư mục `backend/src/test` có các bài kiểm thử tự động cho backend:
 - Unit tests cho Service layer
 - Integration tests cho Controller layer
+- Tất cả tests đã được cập nhật để sử dụng severity levels mới
 
 ## 📝 Phát triển
+
+### Tính năng mới đã triển khai:
+
+1. **Thay đổi hệ thống phân loại mức độ nghiêm trọng**:
+   - **Hoàn toàn cập nhật** từ mã phân loại cũ (SEV1, SEV2, SEV3, SEV4) sang hệ thống mô tả rõ ràng (CRITICAL, HIGH, MEDIUM, LOW).
+   - Cập nhật toàn bộ backend Java (Incident.java, Service, Controller) và frontend.
+   - Tất cả API endpoints hiện sử dụng trực tiếp các giá trị mới.
+   - Migration script V2__update_severity_levels.sql để cập nhật dữ liệu hiện có.
+
+2. **Tính năng chỉnh sửa sự cố hoàn chỉnh**:
+   - Modal chỉnh sửa trong giao diện với dropdown severity levels mới.
+   - Hỗ trợ chỉnh sửa đầy đủ: tiêu đề, mô tả, trạng thái, mức độ nghiêm trọng, dịch vụ bị ảnh hưởng và người phụ trách.
+   - API endpoint PUT /api/incidents/{id} hoạt động hoàn hảo với hệ thống enum mới.
+   - Loại bỏ các hàm chuyển đổi không cần thiết, đơn giản hóa code.
 
 ### Thêm tính năng mới:
 
@@ -181,6 +260,22 @@ Trong thư mục `backend/src/test` có các bài kiểm thử tự động cho 
 2. **Frontend**:
    - Với phiên bản HTML/JS: Chỉnh sửa `frontend/src/fallback-index.html`
    - Với phiên bản Angular: Phát triển trong `frontend/src/app`
+
+### Thông tin kỹ thuật quan trọng:
+
+1. **Mức độ nghiêm trọng**: 
+   - **CRITICAL** (Nghiêm trọng): Sự cố ảnh hưởng đến nhiều người dùng
+   - **HIGH** (Cao): Vấn đề chức năng quan trọng ảnh hưởng đến một số người dùng  
+   - **MEDIUM** (Trung bình): Vấn đề chức năng nhỏ ảnh hưởng đến ít người dùng
+   - **LOW** (Thấp): Tác động tối thiểu, thường cho cải tiến hoặc sửa lỗi không khẩn cấp
+   
+   *Lưu ý: Hệ thống đã cập nhật từ mã phân loại cũ (SEV1-SEV4) sang hệ thống mô tả rõ ràng hơn*
+
+2. **Trạng thái sự cố**:
+   - **INVESTIGATING**: Đang điều tra
+   - **IDENTIFIED**: Đã xác định  
+   - **MONITORING**: Đang theo dõi
+   - **RESOLVED**: Đã giải quyết
 
 ### Quản lý Database:
 

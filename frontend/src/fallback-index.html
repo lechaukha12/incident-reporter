@@ -18,8 +18,8 @@
             padding: 20px;
         }
         header {
-            background-color: #1890ff;
-            color: white;
+            background-color: #ffde00;
+            color: #0171bb;
             padding: 20px;
             display: flex;
             justify-content: space-between;
@@ -30,7 +30,7 @@
             font-size: 24px;
         }
         button {
-            background-color: #52c41a;
+            background-color: #0171bb;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -39,7 +39,18 @@
             font-size: 14px;
         }
         button:hover {
-            background-color: #389e0d;
+            background-color: #014a8a;
+        }
+        
+        header button {
+            background-color: #ffde00;
+            color: #0171bb;
+            border: 2px solid #0171bb;
+        }
+        
+        header button:hover {
+            background-color: #e6c700;
+            color: #0171bb;
         }
         .stats {
             display: flex;
@@ -57,7 +68,7 @@
         .stat-card h2 {
             font-size: 32px;
             margin: 0 0 10px 0;
-            color: #1890ff;
+            color: #0171bb;
         }
         .table-container {
             background-color: white;
@@ -89,29 +100,29 @@
             font-size: 12px;
             font-weight: 500;
         }
-        .tag-sev1 {
+        .tag-critical {
             background-color: #ff4d4f;
             color: white;
         }
-        .tag-sev2 {
-            background-color: #faad14;
-            color: white;
+        .tag-high {
+            background-color: #ffde00;
+            color: #0171bb;
         }
-        .tag-sev3 {
-            background-color: #1890ff;
-            color: white;
+        .tag-medium {
+            background-color: #ffde00;
+            color: #0171bb;
         }
-        .tag-sev4 {
+        .tag-low {
             background-color: #52c41a;
             color: white;
         }
         .tag-investigating {
-            background-color: #faad14;
-            color: white;
+            background-color: #ffde00;
+            color: #0171bb;
         }
         .tag-identified {
-            background-color: #1890ff;
-            color: white;
+            background-color: #ffde00;
+            color: #0171bb;
         }
         .tag-monitoring {
             background-color: #722ed1;
@@ -161,7 +172,7 @@
         
         .modal-header h2 {
             margin: 0;
-            color: #1890ff;
+            color: #0171bb;
         }
         
         .close {
@@ -195,9 +206,9 @@
         }
         
         .form-control:focus {
-            border-color: #1890ff;
+            border-color: #0171bb;
             outline: none;
-            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+            box-shadow: 0 0 0 2px rgba(1, 113, 187, 0.2);
         }
         
         select.form-control {
@@ -227,11 +238,11 @@
         }
         
         .btn-submit {
-            background-color: #1890ff;
+            background-color: #0171bb;
         }
         
         .btn-submit:hover {
-            background-color: #096dd9;
+            background-color: #014a8a;
         }
     </style>
 </head>
@@ -266,7 +277,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modal tạo sự cố mới -->
     <div id="createModal" class="modal">
         <div class="modal-content">
@@ -286,7 +297,7 @@
                 <div class="form-group">
                     <label for="status">Trạng thái</label>
                     <select id="status" class="form-control">
-                        <option value="INVESTIGATING">Đang điều tra</option>
+                        <option value="INVESTIGATING">Đang xác định</option>
                         <option value="IDENTIFIED">Đã xác định</option>
                         <option value="MONITORING">Đang theo dõi</option>
                         <option value="RESOLVED">Đã giải quyết</option>
@@ -295,10 +306,10 @@
                 <div class="form-group">
                     <label for="severityLevel">Mức độ nghiêm trọng</label>
                     <select id="severityLevel" class="form-control">
-                        <option value="SEV1">SEV1 - Nghiêm trọng</option>
-                        <option value="SEV2" selected>SEV2 - Cao</option>
-                        <option value="SEV3">SEV3 - Trung bình</option>
-                        <option value="SEV4">SEV4 - Thấp</option>
+                        <option value="CRITICAL">Nghiêm trọng</option>
+                        <option value="HIGH" selected>Cao</option>
+                        <option value="MEDIUM">Trung bình</option>
+                        <option value="LOW">Thấp</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -312,6 +323,57 @@
                 <div class="btn-row">
                     <button type="button" class="btn-cancel" id="cancelBtn">Hủy bỏ</button>
                     <button type="submit" class="btn-submit">Tạo sự cố</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal chỉnh sửa sự cố -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Chỉnh sửa sự cố</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="editIncidentForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editTitle">Tiêu đề sự cố</label>
+                    <input type="text" id="editTitle" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">Mô tả</label>
+                    <textarea id="editDescription" class="form-control" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus">Trạng thái</label>
+                    <select id="editStatus" class="form-control">
+                        <option value="INVESTIGATING">Đang xác định</option>
+                        <option value="IDENTIFIED">Đã xác định</option>
+                        <option value="MONITORING">Đang theo dõi</option>
+                        <option value="RESOLVED">Đã giải quyết</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editSeverityLevel">Mức độ nghiêm trọng</label>
+                    <select id="editSeverityLevel" class="form-control">
+                        <option value="CRITICAL">Nghiêm trọng</option>
+                        <option value="HIGH">Cao</option>
+                        <option value="MEDIUM">Trung bình</option>
+                        <option value="LOW">Thấp</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editAffectedService">Dịch vụ bị ảnh hưởng</label>
+                    <input type="text" id="editAffectedService" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editAssignee">Người phụ trách</label>
+                    <input type="text" id="editAssignee" class="form-control">
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn-cancel" id="editCancelBtn">Hủy bỏ</button>
+                    <button type="submit" class="btn-submit">Cập nhật sự cố</button>
                 </div>
             </form>
         </div>
@@ -330,25 +392,39 @@
         const incidentsTableEl = document.getElementById('incidents-table');
         const createBtn = document.getElementById('createBtn');
         const createModal = document.getElementById('createModal');
-        const closeModalBtn = document.querySelector('.close');
+        const closeModalBtn = document.querySelector('#createModal .close');
         const cancelBtn = document.getElementById('cancelBtn');
         const createIncidentForm = document.getElementById('createIncidentForm');
+        
+        // Edit Modal Elements
+        const editModal = document.getElementById('editModal');
+        const editCloseModalBtn = document.querySelector('#editModal .close');
+        const editCancelBtn = document.getElementById('editCancelBtn');
+        const editIncidentForm = document.getElementById('editIncidentForm');
         
         // Load data on page load
         document.addEventListener('DOMContentLoaded', () => {
             fetchStats();
             fetchIncidents();
             
-            // Add event listeners for modal
+            // Add event listeners for create modal
             createBtn.addEventListener('click', openModal);
             closeModalBtn.addEventListener('click', closeModal);
             cancelBtn.addEventListener('click', closeModal);
             createIncidentForm.addEventListener('submit', createIncident);
             
-            // Close modal when clicking outside
+            // Add event listeners for edit modal
+            editCloseModalBtn.addEventListener('click', closeEditModal);
+            editCancelBtn.addEventListener('click', closeEditModal);
+            editIncidentForm.addEventListener('submit', updateIncident);
+            
+            // Close modals when clicking outside
             window.addEventListener('click', (event) => {
                 if (event.target === createModal) {
                     closeModal();
+                }
+                if (event.target === editModal) {
+                    closeEditModal();
                 }
             });
         });
@@ -466,6 +542,7 @@
                             <th>Dịch vụ bị ảnh hưởng</th>
                             <th>Người báo cáo</th>
                             <th>Thời gian tạo</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -474,10 +551,15 @@
                                 <td>${incident.id}</td>
                                 <td>${incident.title}</td>
                                 <td><span class="tag tag-${incident.status.toLowerCase()}">${getStatusLabel(incident.status)}</span></td>
-                                <td><span class="tag tag-${incident.severityLevel.toLowerCase()}">${incident.severityLevel}</span></td>
+                                <td><span class="tag tag-${incident.severityLevel.toLowerCase()}">${getSeverityLabel(incident.severityLevel)}</span></td>
                                 <td>${incident.affectedService || '-'}</td>
                                 <td>${incident.reportedBy || '-'}</td>
                                 <td>${formatDate(incident.createdAt)}</td>
+                                <td>
+                                    <button onclick="openEditModal(${incident.id})" class="btn-edit" style="background-color: #0171bb; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;">
+                                        Sửa
+                                    </button>
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -503,12 +585,108 @@
         // Helper function to get status labels
         function getStatusLabel(status) {
             const statusMap = {
-                'INVESTIGATING': 'Đang điều tra',
+                'INVESTIGATING': 'Đang xác định',
                 'IDENTIFIED': 'Đã xác định',
                 'MONITORING': 'Đang theo dõi',
                 'RESOLVED': 'Đã giải quyết'
             };
             return statusMap[status] || status;
+        }
+        
+        // Helper function to get severity labels
+        function getSeverityLabel(severity) {
+            const severityMap = {
+                'CRITICAL': 'Nghiêm trọng',
+                'HIGH': 'Cao',
+                'MEDIUM': 'Trung bình',
+                'LOW': 'Thấp',
+                'SEV1': 'Nghiêm trọng',
+                'SEV2': 'Cao',
+                'SEV3': 'Trung bình',
+                'SEV4': 'Thấp'
+            };
+            return severityMap[severity] || severity;
+        }
+        // Open edit modal
+        function openEditModal(id) {
+            fetch(`${API_BASE_URL}/incidents/${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(incident => {
+                    document.getElementById('editId').value = incident.id;
+                    document.getElementById('editTitle').value = incident.title;
+                    document.getElementById('editDescription').value = incident.description;
+                    document.getElementById('editStatus').value = incident.status;
+                    document.getElementById('editSeverityLevel').value = incident.severityLevel;
+                    document.getElementById('editAffectedService').value = incident.affectedService || '';
+                    document.getElementById('editAssignee').value = incident.assignee || '';
+                    
+                    editModal.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching incident details:', error);
+                    alert(`Lỗi khi tải thông tin sự cố: ${error.message}`);
+                });
+        }
+        
+        // Close edit modal
+        function closeEditModal() {
+            editModal.style.display = 'none';
+            editIncidentForm.reset();
+        }
+        
+        // Update incident
+        function updateIncident(event) {
+            event.preventDefault();
+            console.log('updateIncident function called');
+            alert('updateIncident function called'); // Debug alert
+            
+            const id = document.getElementById('editId').value;
+            console.log('Incident ID:', id);
+            alert('Incident ID: ' + id); // Debug alert
+            
+            const severityValue = document.getElementById('editSeverityLevel').value;
+            console.log('Severity value:', severityValue);
+            alert('Severity value: ' + severityValue); // Debug alert
+            
+            // Chỉ gửi các trường IncidentUpdateDTO cần
+            const updatedIncident = {
+                status: document.getElementById('editStatus').value,
+                severityLevel: severityValue,
+                assignee: document.getElementById('editAssignee').value,
+                resolved: false // Mặc định là false
+            };
+            
+            console.log('Data being sent to API:', JSON.stringify(updatedIncident));
+            
+            fetch(`${API_BASE_URL}/incidents/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedIncident)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Refresh data
+                fetchStats();
+                fetchIncidents();
+                closeEditModal();
+                alert('Đã cập nhật sự cố thành công!');
+            })
+            .catch(error => {
+                console.error('Error updating incident:', error);
+                alert(`Lỗi khi cập nhật sự cố: ${error.message}`);
+            });
         }
     </script>
 </body>

@@ -74,9 +74,9 @@ public class Incident {
     }
 
     public enum SeverityLevel {
-        SEV1, // Critical - Urgent service outage affecting many users
-        SEV2, // High - Significant functionality issue affecting some users
-        SEV3, // Medium - Minor functionality issue affecting few users
-        SEV4  // Low - Minimal impact, typically for improvements or non-urgent fixes
+        CRITICAL, // Nghiêm trọng - Sự cố ảnh hưởng đến nhiều người dùng
+        HIGH,     // Cao - Vấn đề chức năng quan trọng ảnh hưởng đến một số người dùng
+        MEDIUM,   // Trung bình - Vấn đề chức năng nhỏ ảnh hưởng đến ít người dùng
+        LOW       // Thấp - Tác động tối thiểu, thường cho cải tiến hoặc sửa lỗi không khẩn cấp
     }
 }

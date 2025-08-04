@@ -53,7 +53,7 @@ public class IncidentServiceTest {
                 .title("Test Incident")
                 .description("Test Description")
                 .status(Incident.IncidentStatus.INVESTIGATING)
-                .severityLevel(Incident.SeverityLevel.SEV1)
+                .severityLevel(Incident.SeverityLevel.CRITICAL)
                 .affectedService("Test Service")
                 .reportedBy("Test User")
                 .resolved(false)
@@ -73,7 +73,7 @@ public class IncidentServiceTest {
         createDTO = IncidentCreateDTO.builder()
                 .title("Test Incident")
                 .description("Test Description")
-                .severityLevel(Incident.SeverityLevel.SEV1)
+                .severityLevel(Incident.SeverityLevel.CRITICAL)
                 .affectedService("Test Service")
                 .reportedBy("Test User")
                 .build();
@@ -136,7 +136,7 @@ public class IncidentServiceTest {
         // Arrange
         IncidentUpdateDTO updateDTO = new IncidentUpdateDTO();
         updateDTO.setStatus(Incident.IncidentStatus.IDENTIFIED);
-        updateDTO.setSeverityLevel(Incident.SeverityLevel.SEV2);
+        updateDTO.setSeverityLevel(Incident.SeverityLevel.HIGH);
 
         when(incidentRepository.findById(1L)).thenReturn(Optional.of(testIncident));
         when(incidentRepository.save(any(Incident.class))).thenReturn(testIncident);
@@ -149,7 +149,7 @@ public class IncidentServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(Incident.IncidentStatus.IDENTIFIED, result.getStatus());
-        assertEquals(Incident.SeverityLevel.SEV2, result.getSeverityLevel());
+        assertEquals(Incident.SeverityLevel.HIGH, result.getSeverityLevel());
 
         verify(incidentRepository).findById(1L);
         verify(incidentRepository).save(testIncident);
@@ -212,7 +212,7 @@ public class IncidentServiceTest {
 
         for (Incident.SeverityLevel level : Incident.SeverityLevel.values()) {
             when(incidentRepository.findBySeverityLevel(eq(level), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(level == Incident.SeverityLevel.SEV1 ? 
+                    .thenReturn(new PageImpl<>(level == Incident.SeverityLevel.CRITICAL ? 
                             List.of(testIncident) : Collections.emptyList()));
         }
 
@@ -234,8 +234,8 @@ public class IncidentServiceTest {
         assertEquals(1L, activeCount);
         assertEquals(0L, resolvedCount);
         
-        assertEquals(1L, severityCounts.get(Incident.SeverityLevel.SEV1));
-        assertEquals(0L, severityCounts.get(Incident.SeverityLevel.SEV2));
+        assertEquals(1L, severityCounts.get(Incident.SeverityLevel.CRITICAL));
+        assertEquals(0L, severityCounts.get(Incident.SeverityLevel.HIGH));
         
         assertEquals(1L, statusCounts.get(Incident.IncidentStatus.INVESTIGATING));
         assertEquals(0L, statusCounts.get(Incident.IncidentStatus.RESOLVED));
@@ -259,7 +259,7 @@ public class IncidentServiceTest {
         assertNotNull(result);
         assertEquals("Test Alert", result.getTitle());
         assertEquals("Test Description", result.getDescription());
-        assertEquals(Incident.SeverityLevel.SEV1, result.getSeverityLevel());
+        assertEquals(Incident.SeverityLevel.CRITICAL, result.getSeverityLevel());
         assertEquals("Test Service", result.getAffectedService());
         assertEquals("Monitoring System", result.getReportedBy());
     }

@@ -263,16 +263,16 @@ public class IncidentService {
         String severityStr = (String) webhookData.getOrDefault("severity", "medium");
         switch (severityStr.toLowerCase()) {
             case "critical":
-                severity = Incident.SeverityLevel.SEV1;
+                severity = Incident.SeverityLevel.CRITICAL;
                 break;
             case "high":
-                severity = Incident.SeverityLevel.SEV2;
+                severity = Incident.SeverityLevel.HIGH;
                 break;
             case "medium":
-                severity = Incident.SeverityLevel.SEV3;
+                severity = Incident.SeverityLevel.MEDIUM;
                 break;
             default:
-                severity = Incident.SeverityLevel.SEV4;
+                severity = Incident.SeverityLevel.LOW;
                 break;
         }
         
