@@ -1,0 +1,222 @@
+<div class="app-container">
+  <div class="app-header">
+    <h1>Hệ thống Báo cáo Sự cố</h1>
+    <button nz-button nzType="primary" (click)="createIncident()">
+      <i nz-icon nzType="plus"></i> Tạo sự cố mới
+    </button>
+  </div>
+
+  <div class="stats-container" *ngIf="stats">
+    <div class="stat-card total">
+      <h2>{{ stats.totalIncidents }}</h2>
+      <p>Tổng số sự cố</p>
+    </div>
+    <div class="stat-card active">
+      <h2>{{ stats.activeIncidents }}</h2>
+      <p>Sự cố đang hoạt động</p>
+    </div>
+    <div class="stat-card resolved">
+      <h2>{{ stats.resolvedIncidents }}</h2>
+      <p>Đã giải quyết</p>
+    </div>
+
+    <div class="stat-filters">
+      <div class="filter-section">
+        <h3>Lọc theo trạng thái</h3>
+        <div class="filter-buttons">
+          <button nz-button *ngFor="let status of statuses" 
+                  (click)="filterByStatus(status.value)" 
+                  class="filter-button">
+            {{ status.label }} 
+            <span *ngIf="stats.byStatus[status.value]" class="count-badge">
+              {{ stats.byStatus[status.value] }}
+            </span>
+          </button>
+          <button nz-button (click)="resetFilters()" class="filter-button reset">
+            Tất cả
+          </button>
+        </div>
+      </div>
+      
+      <div class="filter-section">
+        <h3>Lọc theo mức độ nghiêm trọng</h3>
+        <div class="filter-buttons">
+          <button nz-button *ngFor="let sev of severityLevels"
+                  (click)="filterBySeverity(sev.value)"
+                  class="filter-button"
+                  [ngStyle]="{'border-color': getSeverityColor(sev.value)}">
+            {{ sev.label }} 
+            <span *ngIf="stats.bySeverity[sev.value]" class="count-badge"
+                  [ngStyle]="{'background-color': getSeverityColor(sev.value)}">
+              {{ stats.bySeverity[sev.value] }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="incidents-container">
+    <nz-table #basicTable [nzData]="incidents" 
+              [nzLoading]="loading"
+              [nzShowPagination]="true"
+              [nzPageSize]="10">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tiêu đề</th>
+          <th>Trạng thái</th>
+          <th>Mức độ</th>
+          <th>Dịch vụ</th>
+          <th>Báo cáo bởi</th>
+          <th>Thời gian</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let incident of basicTable.data">
+          <td>{{ incident.id }}</td>
+          <td class="title-cell">
+            <a (click)="showIncidentDetails(incident)">{{ incident.title }}</a>
+          </td>
+          <td>
+            <nz-tag [nzColor]="getStatusColor(incident.status)">
+              {{ incident.status }}
+            </nz-tag>
+          </td>
+          <td>
+            <nz-tag [nzColor]="getSeverityColor(incident.severityLevel)">
+              {{ incident.severityLevel }}
+            </nz-tag>
+          </td>
+          <td>{{ incident.affectedService || '-' }}</td>
+          <td>{{ incident.reportedBy }}</td>
+          <td>{{ formatDate(incident.createdAt) }}</td>
+          <td>
+            <button nz-button nzType="primary" nzSize="small" (click)="showUpdateModal(incident)">
+              Cập nhật
+            </button>
+            <button *ngIf="incident.status !== 'RESOLVED'" 
+                    nz-button nzType="default" nzSize="small" 
+                    (click)="resolveIncident(incident)" class="resolve-btn">
+              Giải quyết
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+
+  <!-- Chi tiết sự cố Modal -->
+  <nz-modal [(nzVisible)]="isModalVisible" 
+            nzTitle="Chi tiết sự cố" 
+            (nzOnCancel)="handleModalCancel()"
+            [nzFooter]="null"
+            nzWidth="800px">
+    <ng-container *nzModalContent>
+      <div class="incident-details" *ngIf="selectedIncident">
+        <div class="incident-header">
+          <h2>{{ selectedIncident.title }}</h2>
+          <div class="incident-meta">
+            <nz-tag [nzColor]="getStatusColor(selectedIncident.status)">
+              {{ selectedIncident.status }}
+            </nz-tag>
+            <nz-tag [nzColor]="getSeverityColor(selectedIncident.severityLevel)">
+              {{ selectedIncident.severityLevel }}
+            </nz-tag>
+            <span class="incident-date">
+              Được báo cáo vào: {{ formatDate(selectedIncident.createdAt) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="incident-info">
+          <div class="info-item">
+            <strong>Mô tả:</strong>
+            <p>{{ selectedIncident.description || 'Không có mô tả' }}</p>
+          </div>
+          <div class="info-item">
+            <strong>Dịch vụ bị ảnh hưởng:</strong>
+            <p>{{ selectedIncident.affectedService || 'Không xác định' }}</p>
+          </div>
+          <div class="info-item">
+            <strong>Báo cáo bởi:</strong>
+            <p>{{ selectedIncident.reportedBy }}</p>
+          </div>
+          <div class="info-item" *ngIf="selectedIncident.assignee">
+            <strong>Người phụ trách:</strong>
+            <p>{{ selectedIncident.assignee }}</p>
+          </div>
+          <div class="info-item" *ngIf="selectedIncident.resolved">
+            <strong>Đã giải quyết vào:</strong>
+            <p>{{ formatDate(selectedIncident.resolvedAt || '') }}</p>
+          </div>
+        </div>
+
+        <div class="timeline-section">
+          <h3>Lịch sử cập nhật</h3>
+          <nz-timeline>
+            <nz-timeline-item *ngFor="let item of selectedIncident.timeline" 
+                              [nzColor]="item.updateType === 'RESOLUTION' ? 'green' : 'blue'">
+              <div class="timeline-item">
+                <div class="timeline-header">
+                  <span class="timeline-type">
+                    {{ item.updateType }}
+                  </span>
+                  <span class="timeline-meta">
+                    <span>{{ item.createdBy }}</span>
+                    <span>{{ formatDate(item.createdAt) }}</span>
+                  </span>
+                </div>
+                <div class="timeline-message">{{ item.message }}</div>
+              </div>
+            </nz-timeline-item>
+            <nz-timeline-item *ngIf="selectedIncident.timeline?.length === 0" 
+                              [nzColor]="'gray'">
+              <div class="timeline-item">
+                <div class="timeline-message">Chưa có cập nhật nào</div>
+              </div>
+            </nz-timeline-item>
+          </nz-timeline>
+        </div>
+
+        <div class="incident-actions">
+          <button nz-button nzType="primary" (click)="showUpdateModal(selectedIncident)">
+            Thêm cập nhật
+          </button>
+          <button *ngIf="selectedIncident.status !== 'RESOLVED'" 
+                  nz-button nzType="default" 
+                  (click)="resolveIncident(selectedIncident)" class="resolve-btn">
+            Đánh dấu đã giải quyết
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </nz-modal>
+
+  <!-- Modal thêm cập nhật -->
+  <nz-modal [(nzVisible)]="isUpdateModalVisible" 
+            nzTitle="Thêm cập nhật" 
+            (nzOnCancel)="handleUpdateModalCancel()"
+            (nzOnOk)="addUpdate()">
+    <ng-container *nzModalContent>
+      <form *ngIf="selectedIncident">
+        <div class="form-item">
+          <label>Loại cập nhật:</label>
+          <nz-select [(ngModel)]="updateType" name="updateType" style="width: 100%;">
+            <nz-option *ngFor="let type of updateTypes" 
+                      [nzValue]="type.value" 
+                      [nzLabel]="type.label"></nz-option>
+          </nz-select>
+        </div>
+        <div class="form-item">
+          <label>Nội dung cập nhật:</label>
+          <textarea nz-input [(ngModel)]="updateMessage" 
+                   name="updateMessage" 
+                   rows="4" 
+                   placeholder="Nhập nội dung cập nhật..."></textarea>
+        </div>
+      </form>
+    </ng-container>
+  </nz-modal>
+</div>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow: auto;
+            max-height: 500px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-ok {
+            color: green;
+            font-weight: bold;
+        }
+        .status-error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    
+    <div class="card">
+        <h2>Environment Variables</h2>
+        <div id="env-info"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Backend API Test</h2>
+        <button id="testLocalhost">Test localhost:8080</button>
+        <button id="testBackend">Test backend:8080</button>
+        <button id="testDynamic">Test Dynamic API URL</button>
+        <div id="api-result"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Browser Information</h2>
+        <div id="browser-info"></div>
+    </div>
+
+    <script>
+        // Display environment info
+        document.getElementById('env-info').innerHTML = `
+            <p>Window Location: ${window.location.href}</p>
+            <p>Hostname: ${window.location.hostname}</p>
+            <p>Dynamic API URL: ${window.location.hostname === 'localhost' ? 'http://localhost:8080/api' : 'http://backend:8080/api'}</p>
+        `;
+        
+        // Display browser info
+        document.getElementById('browser-info').innerHTML = `
+            <p>User Agent: ${navigator.userAgent}</p>
+            <p>Platform: ${navigator.platform}</p>
+        `;
+
+        // Function to test API
+        function testAPI(url) {
+            const resultElement = document.getElementById('api-result');
+            resultElement.innerHTML = `<p>Testing connection to: ${url}...</p>`;
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    resultElement.innerHTML += `
+                        <p class="status-ok">✅ Connection successful!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                })
+                .catch(error => {
+                    resultElement.innerHTML += `
+                        <p class="status-error">❌ Connection failed: ${error.message}</p>
+                    `;
+                    console.error('Error:', error);
+                });
+        }
+
+        // Add event listeners to buttons
+        document.getElementById('testLocalhost').addEventListener('click', () => {
+            testAPI('http://localhost:8080/api/incidents');
+        });
+        
+        document.getElementById('testBackend').addEventListener('click', () => {
+            testAPI('http://backend:8080/api/incidents');
+        });
+        
+        document.getElementById('testDynamic').addEventListener('click', () => {
+            const dynamicUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080/api/incidents' : 'http://backend:8080/api/incidents';
+            testAPI(dynamicUrl);
+        });
+    </script>
+</body>
+</html>
