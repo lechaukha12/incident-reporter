@@ -235,7 +235,7 @@ export class AppComponent implements OnInit {
               title: '',
               description: '',
               status: 'INVESTIGATING',
-              severityLevel: 'SEV2',
+              severityLevel: 'HIGH',
               affectedService: '',
               reportedBy: ''
             };

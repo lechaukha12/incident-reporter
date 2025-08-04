@@ -43,7 +43,7 @@ services:
       dockerfile: Dockerfile.nginx
     container_name: sentinel-frontend
     ports:
-      - "4200:4200"
+      - "80:80"
     depends_on:
       - backend
     networks:

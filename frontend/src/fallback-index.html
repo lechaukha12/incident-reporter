@@ -599,11 +599,7 @@
                 'CRITICAL': 'Nghiêm trọng',
                 'HIGH': 'Cao',
                 'MEDIUM': 'Trung bình',
-                'LOW': 'Thấp',
-                'SEV1': 'Nghiêm trọng',
-                'SEV2': 'Cao',
-                'SEV3': 'Trung bình',
-                'SEV4': 'Thấp'
+                'LOW': 'Thấp'
             };
             return severityMap[severity] || severity;
         }
@@ -644,12 +640,11 @@
             event.preventDefault();
             
             const id = document.getElementById('editId').value;
-            const severityValue = document.getElementById('editSeverityLevel').value;
             
             // Chỉ gửi các trường IncidentUpdateDTO cần
             const updatedIncident = {
                 status: document.getElementById('editStatus').value,
-                severityLevel: severityValue,
+                severityLevel: document.getElementById('editSeverityLevel').value,
                 assignee: document.getElementById('editAssignee').value,
                 resolved: false // Mặc định là false
             };
