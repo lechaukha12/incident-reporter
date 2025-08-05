@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Điều Khiển Sự Cố</title>
+  <link rel="stylesheet" href="custom-styles.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+      background-color: #f0f2f5;
+      padding: 0;
+      margin: 0;
+    }
+    .app-container {
+      padding: 30px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-top: 12px;
+    }
+    .app-header h1 {
+      margin-bottom: 0;
+      color: #1890ff;
+      font-size: 30px;
+    }
+    .stats-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background-color: #fff;
+      border-radius: 4px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+      min-width: 150px;
+      flex: 1;
+      text-align: center;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .stat-card h2 {
+      font-size: 36px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .stat-card p {
+      margin-bottom: 0;
+      color: #8c8c8c;
+    }
+    .stat-card.total h2 {
+      color: #1890ff;
+    }
+    .stat-card.active h2 {
+      color: #fa8c16;
+    }
+    .stat-card.resolved h2 {
+      color: #52c41a;
+    }
+    .incidents-container {
+      background-color: #fff;
+      border-radius: 4px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    th {
+      background-color: #fafafa;
+      font-weight: 500;
+    }
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .btn-primary {
+      background-color: #1890ff;
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: #096dd9;
+    }
+    .home-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #1890ff;
+      text-decoration: none;
+    }
+    .home-link:hover {
+      text-decoration: underline;
+    }
+    .nav-bar {
+      display: flex;
+      gap: 20px;
+    }
+    .nav-bar a {
+      color: #595959;
+      text-decoration: none;
+      padding: 8px 0;
+      font-weight: 500;
+    }
+    .nav-bar a:hover, .nav-bar a.active {
+      color: #1890ff;
+      border-bottom: 2px solid #1890ff;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: white;
+    }
+    .badge-critical {
+      background-color: #f5222d;
+    }
+    .badge-high {
+      background-color: #fa8c16;
+    }
+    .badge-medium {
+      background-color: #faad14;
+    }
+    .badge-low {
+      background-color: #52c41a;
+    }
+    .badge-investigating {
+      background-color: #1890ff;
+    }
+    .badge-identified {
+      background-color: #722ed1;
+    }
+    .badge-resolved {
+      background-color: #52c41a;
+    }
+    .refresh-btn {
+      margin-left: auto;
+    }
+    .btn-text {
+      background: none;
+      border: none;
+      color: #1890ff;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+      font: inherit;
+    }
+    .btn-text:hover {
+      color: #096dd9;
+    }
+    .loader {
+      display: none;
+      border: 3px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 3px solid #1890ff;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="app-header">
+      <h1>Bảng Điều Khiển Sự Cố</h1>
+      <div class="nav-bar">
+        <a href="index.html">Trang Chủ</a>
+        <a href="#" class="active">Danh Sách Sự Cố</a>
+        <a href="api-test.html">Kiểm Tra API</a>
+      </div>
+    </div>
+
+    <div class="stats-container">
+      <div class="stat-card total">
+        <h2 id="totalCount">0</h2>
+        <p>Tổng Số Sự Cố</p>
+      </div>
+      <div class="stat-card active">
+        <h2 id="activeCount">0</h2>
+        <p>Sự Cố Đang Hoạt Động</p>
+      </div>
+      <div class="stat-card resolved">
+        <h2 id="resolvedCount">0</h2>
+        <p>Sự Cố Đã Giải Quyết</p>
+      </div>
+    </div>
+
+    <div class="incidents-container">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Danh Sách Sự Cố</h2>
+        <button class="btn btn-primary" onclick="refreshIncidents()">Làm Mới Dữ Liệu</button>
+      </div>
+      <div class="loader" id="loader"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tiêu Đề</th>
+            <th>Dịch Vụ Ảnh Hưởng</th>
+            <th>Người Phụ Trách</th>
+            <th>Mức Độ</th>
+            <th>Trạng Thái</th>
+            <th>Cập Nhật Lần Cuối</th>
+          </tr>
+        </thead>
+        <tbody id="incidentsTable">
+          <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      refreshIncidents();
+    });
+
+    function refreshIncidents() {
+      const loader = document.getElementById('loader');
+      loader.style.display = 'block';
+      
+      fetch('http://localhost:8080/api/incidents')
+        .then(response => response.json())
+        .then(data => {
+          displayIncidents(data);
+          updateStats(data);
+          loader.style.display = 'none';
+        })
+        .catch(error => {
+          console.error('Error fetching incidents:', error);
+          loader.style.display = 'none';
+          alert('Không thể tải dữ liệu sự cố. Vui lòng thử lại sau.');
+        });
+    }
+
+    function displayIncidents(data) {
+      const tableBody = document.getElementById('incidentsTable');
+      tableBody.innerHTML = '';
+      
+      if (data.content && data.content.length > 0) {
+        data.content.forEach(incident => {
+          const row = document.createElement('tr');
+          
+          const updatedDate = new Date(incident.updatedAt);
+          const formattedDate = updatedDate.toLocaleString('vi-VN');
+          
+          row.innerHTML = `
+            <td>${incident.id}</td>
+            <td><a href="#" class="btn-text" onclick="viewIncidentDetails(${incident.id})">${incident.title}</a></td>
+            <td>${incident.affectedService || 'N/A'}</td>
+            <td>${incident.assignee || 'Chưa phân công'}</td>
+            <td><span class="badge badge-${incident.severityLevel.toLowerCase()}">${getSeverityText(incident.severityLevel)}</span></td>
+            <td><span class="badge badge-${incident.status.toLowerCase()}">${getStatusText(incident.status)}</span></td>
+            <td>${formattedDate}</td>
+          `;
+          
+          tableBody.appendChild(row);
+        });
+      } else {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = '<td colspan="7" style="text-align: center;">Không có sự cố nào được tìm thấy</td>';
+        tableBody.appendChild(emptyRow);
+      }
+    }
+
+    function updateStats(data) {
+      if (data.content) {
+        const totalCount = data.totalElements;
+        const resolvedCount = data.content.filter(incident => incident.resolved).length;
+        const activeCount = totalCount - resolvedCount;
+        
+        document.getElementById('totalCount').textContent = totalCount;
+        document.getElementById('activeCount').textContent = activeCount;
+        document.getElementById('resolvedCount').textContent = resolvedCount;
+      }
+    }
+
+    function getSeverityText(severity) {
+      switch (severity) {
+        case 'CRITICAL': return 'Nghiêm Trọng';
+        case 'HIGH': return 'Cao';
+        case 'MEDIUM': return 'Trung Bình';
+        case 'LOW': return 'Thấp';
+        default: return severity;
+      }
+    }
+
+    function getStatusText(status) {
+      switch (status) {
+        case 'INVESTIGATING': return 'Đang Điều Tra';
+        case 'IDENTIFIED': return 'Đã Xác Định';
+        case 'MONITORING': return 'Đang Giám Sát';
+        case 'RESOLVED': return 'Đã Giải Quyết';
+        default: return status;
+      }
+    }
+
+    function viewIncidentDetails(id) {
+      alert('Chức năng xem chi tiết sự cố ID: ' + id + ' sẽ được phát triển trong phiên bản tiếp theo.');
+    }
+  </script>
+</body>
+</html>
