@@ -71,7 +71,21 @@ public class IncidentController {
     public ResponseEntity<IncidentResponseDTO> updateIncident(
             @PathVariable Long id, 
             @Valid @RequestBody IncidentUpdateDTO dto) {
-        return ResponseEntity.ok(incidentService.updateIncident(id, dto));
+        
+        try {
+            System.out.println("CONTROLLER - Received DTO: title=" + dto.getTitle() + 
+                             ", description=" + dto.getDescription() + 
+                             ", affectedService=" + dto.getAffectedService() + 
+                             ", reportedBy=" + dto.getReportedBy());
+            
+            IncidentResponseDTO result = incidentService.updateIncident(id, dto);
+            System.out.println("UPDATE SUCCESS - Title in response: " + result.getTitle());
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.out.println("UPDATE ERROR: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     @PostMapping("/{id}/updates")

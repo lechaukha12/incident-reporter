@@ -379,6 +379,10 @@
                     <input type="text" id="editAffectedService" class="form-control" required>
                 </div>
                 <div class="form-group">
+                    <label for="editReportedBy">Người báo cáo</label>
+                    <input type="text" id="editReportedBy" class="form-control" required>
+                </div>
+                <div class="form-group">
                     <label for="editAssignee">Người phụ trách</label>
                     <input type="text" id="editAssignee" class="form-control">
                 </div>
@@ -642,6 +646,7 @@
                     document.getElementById('editStatus').value = incident.status;
                     document.getElementById('editSeverityLevel').value = incident.severityLevel;
                     document.getElementById('editAffectedService').value = incident.affectedService || '';
+                    document.getElementById('editReportedBy').value = incident.reportedBy || '';
                     document.getElementById('editAssignee').value = incident.assignee || '';
                     document.getElementById('editNotes').value = incident.notes || '';
                     document.getElementById('editRootCause').value = incident.rootCause || '';
@@ -668,14 +673,18 @@
             
             const id = document.getElementById('editId').value;
             
-            // Chỉ gửi các trường IncidentUpdateDTO cần
+            // Gửi tất cả các trường có thể chỉnh sửa
             const updatedIncident = {
+                title: document.getElementById('editTitle').value,
+                description: document.getElementById('editDescription').value,
                 status: document.getElementById('editStatus').value,
                 severityLevel: document.getElementById('editSeverityLevel').value,
+                affectedService: document.getElementById('editAffectedService').value,
+                reportedBy: document.getElementById('editReportedBy').value,
                 assignee: document.getElementById('editAssignee').value,
                 notes: document.getElementById('editNotes').value,
                 rootCause: document.getElementById('editRootCause').value,
-                resolved: false // Mặc định là false
+                resolved: document.getElementById('editStatus').value === 'RESOLVED'
             };
             
             console.log('Data being sent to API:', JSON.stringify(updatedIncident));

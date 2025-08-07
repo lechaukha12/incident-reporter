@@ -27,7 +27,77 @@ Tại môi trường microservices phức tạp của ứng dụng mobile bankin
 - **Thông báo tức thì**: Tích hợp với Slack/Teams để gửi thông báo về các cập nhật quan trọng
 - **Giao diện trực quan**: Dashboard hiển thị danh sách incident, cho phép lọc và tìm kiếm dễ dàng
 
-## 📋 Thay Đổi Gần Đây
+## � Vấn Đề Hiện Tại & Đề Xuất Khắc Phục
+
+### ⚠️ Lỗi Nghiêm Trọng - Không Cập Nhật Được 4 Trường Dữ Liệu
+
+**Mô tả lỗi:**
+Khi cập nhật incident qua API PUT `/api/incidents/{id}`, có 4 trường cụ thể **KHÔNG** được cập nhật:
+- `title` (Tiêu đề sự cố)
+- `description` (Mô tả) 
+- `affectedService` (Dịch vụ bị ảnh hưởng)
+- `reportedBy` (Người báo cáo)
+
+**Trạng thái:** ❌ Chưa giải quyết được
+
+**Các trường CÓ THỂ cập nhật bình thường:**
+- `status`, `severityLevel`, `assignee`, `notes`, `rootCause`
+
+**Điều tra đã thực hiện:**
+1. ✅ **Database Schema**: Đã validate, cấu trúc database chính xác
+2. ✅ **Direct SQL**: Test trực tiếp UPDATE statement - hoạt động bình thường  
+3. ✅ **JPA/Hibernate Logging**: Đã enable SQL logging và parameter binding
+4. ✅ **Entity Manager**: Đã thử `clear()`, `flush()`, reload entity
+5. ✅ **Native SQL Workaround**: Thử cả `EntityManager.createNativeQuery()` và `@Query` annotation
+6. ✅ **Enhanced Debugging**: Thêm extensive logging và error handling
+
+**Phát hiện quan trọng:**
+- Backend nhận đúng request và DTO có đủ data
+- Hibernate thực hiện UPDATE query với đầy đủ parameters  
+- Database structure hoàn toàn chính xác
+- Chỉ 4/8 fields bị ảnh hưởng - không phải ngẫu nhiên
+- Có thể liên quan đến JPA entity mapping hoặc Spring configuration sâu bên trong
+
+**Đề xuất khắc phục:**
+
+#### Ưu tiên 1: Kiểm tra Entity Mapping
+```bash
+# Kiểm tra file Incident.java
+backend/src/main/java/com/nganhang/sentinel/model/Incident.java
+```
+- Review các annotation `@Column`, `@Table`
+- Tìm các constraint hoặc mapping đặc biệt cho 4 fields này
+- Kiểm tra có getter/setter đặc biệt không
+
+#### Ưu tiên 2: Rebuild Entity từ đầu
+```java
+// Tạo lại entity với mapping đơn giản nhất
+@Entity
+@Table(name = "incidents")
+public class Incident {
+    @Column(name = "title", length = 255)
+    private String title;
+    // ...
+}
+```
+
+#### Ưu tiên 3: Workaround tạm thời
+```java
+// Implement separate update methods cho từng nhóm fields
+public void updateBasicFields(Long id, String title, String description, String affectedService, String reportedBy) {
+    // Use pure JDBC or separate native update
+}
+```
+
+#### Ưu tiên 4: Configuration Review
+```properties
+# Kiểm tra application.properties
+spring.jpa.hibernate.ddl-auto=
+spring.jpa.database-platform=
+logging.level.org.hibernate.SQL=DEBUG
+```
+
+### �📋 Thay Đổi Gần Đây
 
 **Phiên bản hiện tại đã sửa các lỗi quan trọng:**
 
@@ -43,6 +113,49 @@ Tại môi trường microservices phức tạp của ứng dụng mobile bankin
 3. **Build Multi-platform Images**
    - Xây dựng các image Docker đa nền tảng (linux/amd64, linux/arm64)
    - Cập nhật các tệp triển khai Kubernetes để sử dụng các image mới nhất
+
+4. **Enhanced Debugging Infrastructure**
+   - Thêm comprehensive logging cho JPA/Hibernate operations
+   - Implement error handling và transaction debugging
+   - Tạo workaround bằng native SQL queries
+
+**Cách reproduce lỗi:**
+```bash
+# 1. Khởi động ứng dụng
+docker-compose up -d
+
+# 2. Kiểm tra incident hiện tại
+curl "http://localhost:8080/api/incidents"
+
+# 3. Thử cập nhật incident (VD: id=4)
+curl -X PUT "http://localhost:8080/api/incidents/4" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "NEW TITLE TEST",
+    "description": "New description test", 
+    "affectedService": "New Service Test",
+    "reportedBy": "New Reporter Test",
+    "severityLevel": "HIGH",
+    "assignee": "New Assignee"
+  }'
+
+# 4. Kiểm tra kết quả - title, description, affectedService, reportedBy sẽ KHÔNG thay đổi
+# Chỉ có severityLevel và assignee được cập nhật
+```
+
+**Debug tools sẵn có:**
+```bash
+# Xem logs backend
+docker logs sentinel-backend --tail 50
+
+# Xem logs chi tiết JPA/Hibernate
+docker logs sentinel-backend 2>&1 | grep "Hibernate:"
+
+# Kiểm tra database trực tiếp  
+docker exec -it sentinel-postgres psql -U incident_user -d incident_db
+\d incidents;
+SELECT * FROM incidents WHERE id = 4;
+```
 
 ## 🛠️ Ngăn xếp Công nghệ (Tech Stack)
 
@@ -220,6 +333,22 @@ API URL được tự động cấu hình dựa trên môi trường:
 - Môi trường Docker: `http://backend:8080/api`
 
 ## 📝 Phát triển tính năng mới
+
+### ⚠️ LƯU Ý QUAN TRỌNG CHO DEVELOPERS
+
+**Trước khi phát triển tính năng mới, vui lòng:**
+1. **Không sử dụng 4 fields có vấn đề** trong logic nghiệp vụ mới cho đến khi được fix
+2. **Test kỹ lưỡng** các API update operations
+3. **Backup database** trước khi thử nghiệm fix
+
+**Fields an toàn để sử dụng:**
+- ✅ `status`, `severityLevel`, `assignee` 
+- ✅ `notes`, `rootCause`
+- ✅ `createdAt`, `updatedAt`, `resolvedAt`
+- ✅ `resolved` (boolean)
+
+**Fields có vấn đề - tránh dựa vào:**
+- ❌ `title`, `description`, `affectedService`, `reportedBy`
 
 ### Backend:
 1. Thêm model/entity trong `model/`

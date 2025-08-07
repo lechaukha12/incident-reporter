@@ -9,11 +9,15 @@ import com.nganhang.sentinel.model.IncidentUpdate;
 import com.nganhang.sentinel.repository.IncidentRepository;
 import com.nganhang.sentinel.repository.IncidentUpdateRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -22,13 +26,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class IncidentService {
-
-    private final IncidentRepository incidentRepository;
-    private final IncidentUpdateRepository incidentUpdateRepository;
     
-    @Transactional
+    private static final Logger logger = LoggerFactory.getLogger(IncidentService.class);
+    
+    @Autowired
+    private IncidentRepository incidentRepository;
+    
+    @Autowired
+    private IncidentUpdateRepository incidentUpdateRepository;
+    
+    @Autowired
+    private EntityManager entityManager;    @Transactional
     public IncidentResponseDTO createIncident(IncidentCreateDTO dto) {
         Incident incident = Incident.builder()
                 .title(dto.getTitle())
@@ -136,13 +145,73 @@ public class IncidentService {
     
     @Transactional
     public IncidentResponseDTO updateIncident(Long id, IncidentUpdateDTO dto) {
+        System.out.println("=== updateIncident called with id=" + id + " ===");
+        logger.info("=== updateIncident called with id={} ===", id);
+        
+        logger.info("SERVICE: Received DTO for incident {}: title={}, description={}, affectedService={}, reportedBy={}", 
+                id, dto.getTitle(), dto.getDescription(), dto.getAffectedService(), dto.getReportedBy());
+        
         Incident incident = incidentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sự cố với ID: " + id));
+        
+        logger.info("SERVICE: Before update - title={}, description={}, affectedService={}, reportedBy={}", 
+                incident.getTitle(), incident.getDescription(), incident.getAffectedService(), incident.getReportedBy());
         
         boolean statusChanged = dto.getStatus() != null && dto.getStatus() != incident.getStatus();
         boolean severityChanged = dto.getSeverityLevel() != null && dto.getSeverityLevel() != incident.getSeverityLevel();
         boolean assigneeChanged = dto.getAssignee() != null && !dto.getAssignee().equals(incident.getAssignee());
         boolean resolvedChanged = dto.isResolved() != incident.isResolved();
+        
+        // Debug log to file
+        try {
+            java.nio.file.Files.write(java.nio.file.Paths.get("/tmp/debug.log"), 
+                ("DTO VALUES: title=" + dto.getTitle() + 
+                 ", description=" + dto.getDescription() + 
+                 ", affectedService=" + dto.getAffectedService() + 
+                 ", reportedBy=" + dto.getReportedBy() + "\n").getBytes(),
+                java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (Exception e) { /* ignore */ }
+
+        // WORKAROUND: Use native query for problematic fields if JPA doesn't work
+        boolean needsNativeUpdate = false;
+        String nativeTitle = null, nativeDescription = null, nativeAffectedService = null, nativeReportedBy = null;
+        
+        // Cập nhật các trường thông tin cơ bản - loại bỏ điều kiện .trim().isEmpty()
+        if (dto.getTitle() != null) {
+            try {
+                java.nio.file.Files.write(java.nio.file.Paths.get("/tmp/debug.log"), 
+                    ("Setting title: BEFORE=" + incident.getTitle() + " TO=" + dto.getTitle() + "\n").getBytes(),
+                    java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+            } catch (Exception e) { /* ignore */ }
+            System.out.println("SERVICE DEBUG - Setting title from '" + incident.getTitle() + "' to '" + dto.getTitle() + "'");
+            incident.setTitle(dto.getTitle());
+            System.out.println("SERVICE DEBUG - Title after set: '" + incident.getTitle() + "'");
+            try {
+                java.nio.file.Files.write(java.nio.file.Paths.get("/tmp/debug.log"), 
+                    ("AFTER SET title=" + incident.getTitle() + "\n").getBytes(),
+                    java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+            } catch (Exception e) { /* ignore */ }
+            needsNativeUpdate = true;
+            nativeTitle = dto.getTitle();
+        }
+        
+        if (dto.getDescription() != null) {
+            System.out.println("SERVICE DEBUG - Setting description from '" + incident.getDescription() + "' to '" + dto.getDescription() + "'");
+            incident.setDescription(dto.getDescription());
+            System.out.println("SERVICE DEBUG - Description after set: '" + incident.getDescription() + "'");
+        }
+        
+        if (dto.getAffectedService() != null) {
+            System.out.println("SERVICE DEBUG - Setting affectedService from '" + incident.getAffectedService() + "' to '" + dto.getAffectedService() + "'");
+            incident.setAffectedService(dto.getAffectedService());
+            System.out.println("SERVICE DEBUG - AffectedService after set: '" + incident.getAffectedService() + "'");
+        }
+        
+        if (dto.getReportedBy() != null) {
+            System.out.println("SERVICE DEBUG - Setting reportedBy from '" + incident.getReportedBy() + "' to '" + dto.getReportedBy() + "'");
+            incident.setReportedBy(dto.getReportedBy());
+            System.out.println("SERVICE DEBUG - ReportedBy after set: '" + incident.getReportedBy() + "'");
+        }
         
         // Cập nhật thông tin sự cố
         if (dto.getStatus() != null) {
@@ -186,10 +255,96 @@ public class IncidentService {
             incident.setRootCause(dto.getRootCause());
         }
         
-        Incident updatedIncident = incidentRepository.save(incident);
+        // Cập nhật thời gian chỉnh sửa
+        incident.setUpdatedAt(LocalDateTime.now());
+        
+        System.out.println("SERVICE DEBUG - Before save: Title='" + incident.getTitle() + "' Description='" + incident.getDescription() + "'");
+        
+        // FORCE JPA TO FLUSH - Clear persistence context and reload entity
+        incidentRepository.flush();
+        entityManager.clear(); // Clear persistence context
+        
+        // Reload entity fresh from database
+        incident = incidentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Incident not found"));
+        
+        // Re-apply ALL changes after reload
+        if (dto.getTitle() != null) {
+            System.out.println("FORCE: Setting title from '" + incident.getTitle() + "' to '" + dto.getTitle() + "'");
+            incident.setTitle(dto.getTitle());
+        }
+        if (dto.getDescription() != null) {
+            System.out.println("FORCE: Setting description from '" + incident.getDescription() + "' to '" + dto.getDescription() + "'");
+            incident.setDescription(dto.getDescription());
+        }
+        if (dto.getAffectedService() != null) {
+            System.out.println("FORCE: Setting affectedService from '" + incident.getAffectedService() + "' to '" + dto.getAffectedService() + "'");
+            incident.setAffectedService(dto.getAffectedService());
+        }
+        if (dto.getReportedBy() != null) {
+            System.out.println("FORCE: Setting reportedBy from '" + incident.getReportedBy() + "' to '" + dto.getReportedBy() + "'");
+            incident.setReportedBy(dto.getReportedBy());
+        }
+        if (dto.getStatus() != null) {
+            incident.setStatus(dto.getStatus());
+            if (dto.getStatus() == Incident.IncidentStatus.RESOLVED) {
+                incident.setResolved(true);
+                incident.setResolvedAt(LocalDateTime.now());
+            } else {
+                incident.setResolved(false);
+                incident.setResolvedAt(null);
+            }
+        }
+        if (dto.getSeverityLevel() != null) {
+            incident.setSeverityLevel(dto.getSeverityLevel());
+        }
+        if (dto.getAssignee() != null) {
+            incident.setAssignee(dto.getAssignee());
+        }
+        if (dto.getNotes() != null) {
+            incident.setNotes(dto.getNotes());
+        }
+        if (dto.getRootCause() != null) {
+            incident.setRootCause(dto.getRootCause());
+        }
+        
+        // Set updated timestamp
+        incident.setUpdatedAt(LocalDateTime.now());
+        
+        Incident updatedIncident;
+        try {
+            updatedIncident = incidentRepository.save(incident);
+            System.out.println("SERVICE DEBUG - After save: Title='" + updatedIncident.getTitle() + "' Description='" + updatedIncident.getDescription() + "'");
+            
+            // WORKAROUND: Always use repository native query for these problematic fields
+            System.out.println("WORKAROUND: Using repository native SQL to update problematic fields");
+            logger.info("WORKAROUND: Using repository native SQL to update problematic fields");
+            int rowsUpdated = incidentRepository.updateProblematicFields(
+                id, 
+                dto.getTitle(),
+                dto.getDescription(), 
+                dto.getAffectedService(),
+                dto.getReportedBy(),
+                LocalDateTime.now()
+            );
+            System.out.println("WORKAROUND: Updated " + rowsUpdated + " rows");
+            logger.info("WORKAROUND: Updated {} rows", rowsUpdated);
+                
+            // Refresh entity after native update
+            entityManager.flush();
+            entityManager.clear();
+            updatedIncident = incidentRepository.findById(id).orElseThrow();
+        } catch (Exception e) {
+            System.out.println("WORKAROUND ERROR: " + e.getMessage());
+            logger.error("WORKAROUND ERROR: ", e);
+            throw e;
+        }
+        
         List<IncidentUpdate> updates = incidentUpdateRepository.findByIncidentOrderByCreatedAtDesc(updatedIncident);
         
-        return mapToResponseDTO(updatedIncident, updates);
+        IncidentResponseDTO result = mapToResponseDTO(updatedIncident, updates);
+        System.out.println("SERVICE DEBUG - Final DTO: Title='" + result.getTitle() + "' Description='" + result.getDescription() + "'");
+        
+        return result;
     }
     
     @Transactional

@@ -12,11 +12,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class IncidentUpdateDTO {
 
+    private String title;
+    
+    private String description;
+    
     private Incident.IncidentStatus status;
     
     private Incident.SeverityLevel severityLevel;
     
+    private String affectedService;
+    
     private String assignee;
+    
+    private String reportedBy;
     
     private boolean resolved;
     
