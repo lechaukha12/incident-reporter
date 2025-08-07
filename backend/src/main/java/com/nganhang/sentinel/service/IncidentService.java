@@ -60,6 +60,7 @@ public class IncidentService {
                 .message("Sự cố được tạo và đang trong quá trình điều tra")
                 .updateType(IncidentUpdate.UpdateType.STATUS_CHANGE)
                 .createdBy(dto.getReportedBy())
+                .createdAt(LocalDateTime.now()) // Thêm thời gian tạo
                 .build();
         
         incidentUpdateRepository.save(initialUpdate);
