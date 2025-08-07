@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API V3 - Debug Title & Description</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            margin: -20px -20px 20px -20px;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .results {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border: 1px solid #e9ecef;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .highlight {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            font-weight: bold;
+        }
+        
+        .debug-info {
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .incident-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 API V3 Debug Test - Title & Description Focus</h1>
+            <p>Debugging specific issues with title và description fields</p>
+        </div>
+        
+        <div class="debug-info">
+            <strong>🎯 Debug Focus:</strong> V3 API với enhanced logging để tìm root cause của title/description update issue
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Tạo mới -->
+        <div class="container">
+            <h2>🆕 Tạo Incident Mới (V3)</h2>
+            <div class="form-group">
+                <label for="createTitle">Tiêu đề sự cố:</label>
+                <input type="text" id="createTitle" value="V3 Test Incident Title" class="highlight">
+            </div>
+            <div class="form-group">
+                <label for="createDescription">Mô tả:</label>
+                <textarea id="createDescription" rows="3" class="highlight">V3 Test incident description for debugging</textarea>
+            </div>
+            <div class="form-group">
+                <label for="createService">Dịch vụ bị ảnh hưởng:</label>
+                <input type="text" id="createService" value="payment-service">
+            </div>
+            <div class="form-group">
+                <label for="createReporter">Người báo cáo:</label>
+                <input type="text" id="createReporter" value="debugger@company.com">
+            </div>
+            <div class="form-group">
+                <label for="createSeverity">Mức độ nghiêm trọng:</label>
+                <select id="createSeverity">
+                    <option value="HIGH">HIGH</option>
+                    <option value="CRITICAL">CRITICAL</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="LOW">LOW</option>
+                </select>
+            </div>
+            <button onclick="createIncident()">Tạo Incident</button>
+            <div id="createResult"></div>
+        </div>
+
+        <!-- Cập nhật -->
+        <div class="container">
+            <h2>✏️ Cập Nhật Incident (V3)</h2>
+            <div class="form-group">
+                <label for="updateId">ID Incident:</label>
+                <input type="number" id="updateId" value="1">
+            </div>
+            <div class="form-group">
+                <label for="updateTitle">🎯 Tiêu đề mới:</label>
+                <input type="text" id="updateTitle" value="UPDATED V3 TITLE DEBUG" class="highlight">
+            </div>
+            <div class="form-group">
+                <label for="updateDescription">🎯 Mô tả mới:</label>
+                <textarea id="updateDescription" rows="3" class="highlight">UPDATED V3 DESCRIPTION for debugging title/description issue</textarea>
+            </div>
+            <div class="form-group">
+                <label for="updateService">Dịch vụ:</label>
+                <input type="text" id="updateService" value="user-service">
+            </div>
+            <div class="form-group">
+                <label for="updateReporter">Người báo cáo:</label>
+                <input type="text" id="updateReporter" value="updated@company.com">
+            </div>
+            <button onclick="updateIncident()">Cập Nhật Incident</button>
+            <div id="updateResult"></div>
+        </div>
+    </div>
+
+    <!-- Danh sách -->
+    <div class="container">
+        <h2>📋 Danh Sách Incidents</h2>
+        <button onclick="loadIncidents()">Tải Danh Sách</button>
+        <button onclick="getIncidentDetails()">Chi Tiết Incident (ID từ ô cập nhật)</button>
+        <div id="incidentsList"></div>
+    </div>
+
+    <!-- So sánh -->
+    <div class="container">
+        <h2>🔍 So Sánh V1 vs V2 vs V3</h2>
+        <div class="debug-info">
+            <strong>Test Plan:</strong><br>
+            1. Tạo incident với V3<br>
+            2. Update title + description với V3<br>
+            3. Check logs và database để xem field nào bị lỗi<br>
+            4. So sánh behavior với V1/V2
+        </div>
+        <button onclick="compareAPIs()">So Sánh 3 APIs</button>
+        <div id="comparisonResult"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8080';
+
+        async function createIncident() {
+            const data = {
+                title: document.getElementById('createTitle').value,
+                description: document.getElementById('createDescription').value,
+                affectedService: document.getElementById('createService').value,
+                reportedBy: document.getElementById('createReporter').value,
+                severityLevel: document.getElementById('createSeverity').value
+            };
+
+            console.log('Creating incident V3:', data);
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/v3/incidents`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                console.log('V3 Create result:', result);
+
+                if (response.ok) {
+                    document.getElementById('createResult').innerHTML = `
+                        <div class="success">
+                            ✅ Tạo thành công! ID: ${result.id}<br>
+                            Title: "${result.title}"<br>
+                            Description: "${result.description}"
+                        </div>
+                        <div class="results">${JSON.stringify(result, null, 2)}</div>
+                    `;
+                    document.getElementById('updateId').value = result.id;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${result.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('V3 Create error:', error);
+                document.getElementById('createResult').innerHTML = `
+                    <div class="error">❌ Lỗi: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function updateIncident() {
+            const id = document.getElementById('updateId').value;
+            const data = {
+                title: document.getElementById('updateTitle').value,
+                description: document.getElementById('updateDescription').value,
+                affectedService: document.getElementById('updateService').value,
+                reportedBy: document.getElementById('updateReporter').value
+            };
+
+            console.log(`Updating incident V3 ID ${id}:`, data);
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/v3/incidents/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                console.log('V3 Update result:', result);
+
+                if (response.ok) {
+                    document.getElementById('updateResult').innerHTML = `
+                        <div class="success">
+                            ✅ Cập nhật thành công!<br>
+                            🎯 Title: "${result.title}"<br>
+                            🎯 Description: "${result.description}"<br>
+                            Service: "${result.affectedService}"<br>
+                            Reporter: "${result.reportedBy}"
+                        </div>
+                        <div class="results">${JSON.stringify(result, null, 2)}</div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${result.message || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('V3 Update error:', error);
+                document.getElementById('updateResult').innerHTML = `
+                    <div class="error">❌ Lỗi: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function loadIncidents() {
+            try {
+                const response = await fetch(`${BASE_URL}/api/v3/incidents?size=5`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    let html = '<h3>📋 Danh sách từ V3 API:</h3>';
+                    result.content.forEach(incident => {
+                        html += `
+                            <div class="incident-item">
+                                <strong>ID ${incident.id}</strong><br>
+                                🎯 <strong>Title:</strong> "${incident.title}"<br>
+                                🎯 <strong>Description:</strong> "${incident.description}"<br>
+                                <strong>Service:</strong> ${incident.affectedService}<br>
+                                <strong>Reporter:</strong> ${incident.reportedBy}<br>
+                                <strong>Updated:</strong> ${new Date(incident.updatedAt).toLocaleString()}
+                            </div>
+                        `;
+                    });
+                    document.getElementById('incidentsList').innerHTML = html;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                document.getElementById('incidentsList').innerHTML = `
+                    <div class="error">❌ Lỗi tải danh sách: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function getIncidentDetails() {
+            const id = document.getElementById('updateId').value;
+            try {
+                const response = await fetch(`${BASE_URL}/api/v3/incidents/${id}`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('incidentsList').innerHTML = `
+                        <h3>🔍 Chi tiết Incident ID ${id}:</h3>
+                        <div class="incident-item highlight">
+                            🎯 <strong>Title:</strong> "${result.title}"<br>
+                            🎯 <strong>Description:</strong> "${result.description}"<br>
+                            <strong>Service:</strong> ${result.affectedService}<br>
+                            <strong>Reporter:</strong> ${result.reportedBy}<br>
+                            <strong>Updated:</strong> ${new Date(result.updatedAt).toLocaleString()}
+                        </div>
+                        <div class="results">${JSON.stringify(result, null, 2)}</div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                document.getElementById('incidentsList').innerHTML = `
+                    <div class="error">❌ Lỗi: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function compareAPIs() {
+            const id = document.getElementById('updateId').value;
+            let comparisonHtml = '<h3>🔍 So sánh V1 vs V2 vs V3:</h3>';
+            
+            try {
+                // Test V1
+                try {
+                    const v1Response = await fetch(`${BASE_URL}/api/incidents/${id}`);
+                    const v1Result = await v1Response.json();
+                    comparisonHtml += `
+                        <div class="incident-item">
+                            <strong>V1 API Result:</strong><br>
+                            Title: "${v1Result.title}"<br>
+                            Description: "${v1Result.description}"
+                        </div>
+                    `;
+                } catch {
+                    comparisonHtml += '<div class="error">V1 API failed</div>';
+                }
+                
+                // Test V2
+                try {
+                    const v2Response = await fetch(`${BASE_URL}/api/v2/incidents/${id}`);
+                    const v2Result = await v2Response.json();
+                    comparisonHtml += `
+                        <div class="incident-item">
+                            <strong>V2 API Result:</strong><br>
+                            Title: "${v2Result.title}"<br>
+                            Description: "${v2Result.description}"
+                        </div>
+                    `;
+                } catch {
+                    comparisonHtml += '<div class="error">V2 API failed</div>';
+                }
+                
+                // Test V3
+                try {
+                    const v3Response = await fetch(`${BASE_URL}/api/v3/incidents/${id}`);
+                    const v3Result = await v3Response.json();
+                    comparisonHtml += `
+                        <div class="incident-item highlight">
+                            <strong>V3 API Result:</strong><br>
+                            🎯 Title: "${v3Result.title}"<br>
+                            🎯 Description: "${v3Result.description}"
+                        </div>
+                    `;
+                } catch {
+                    comparisonHtml += '<div class="error">V3 API failed</div>';
+                }
+                
+            } catch (error) {
+                comparisonHtml += `<div class="error">Comparison failed: ${error.message}</div>`;
+            }
+            
+            document.getElementById('comparisonResult').innerHTML = comparisonHtml;
+        }
+
+        // Auto load incidents on page load
+        window.onload = function() {
+            loadIncidents();
+        };
+    </script>
+</body>
+</html>

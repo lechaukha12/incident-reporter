@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test API V2 - Refactored Backend</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .test-section h3 {
+      color: #333;
+      margin-top: 0;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .success {
+      background: #28a745;
+    }
+    .danger {
+      background: #dc3545;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .result {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      border-left: 4px solid #007bff;
+    }
+    .error {
+      border-left-color: #dc3545;
+      background: #fff5f5;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Test API V2 - Refactored Backend</h1>
+    <p><strong>Mục tiêu:</strong> Test API v2 đã được refactor để khắc phục lỗi cập nhật 4 fields</p>
+    
+    <!-- GET All Incidents -->
+    <div class="test-section">
+      <h3>📋 1. Lấy danh sách incidents (API V2)</h3>
+      <button onclick="getAllIncidentsV2()">GET /api/v2/incidents</button>
+      <div id="getAllResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- CREATE Incident -->
+    <div class="test-section">
+      <h3>➕ 2. Tạo incident mới (API V2)</h3>
+      <div class="form-group">
+        <label>Title:</label>
+        <input type="text" id="createTitle" value="Test V2 Incident" />
+      </div>
+      <div class="form-group">
+        <label>Description:</label>
+        <textarea id="createDescription">Test incident created with V2 API</textarea>
+      </div>
+      <div class="form-group">
+        <label>Affected Service:</label>
+        <input type="text" id="createService" value="V2 Test Service" />
+      </div>
+      <div class="form-group">
+        <label>Reported By:</label>
+        <input type="text" id="createReporter" value="V2 API Tester" />
+      </div>
+      <div class="form-group">
+        <label>Severity Level:</label>
+        <select id="createSeverity">
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM" selected>MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+          <option value="CRITICAL">CRITICAL</option>
+        </select>
+      </div>
+      <button onclick="createIncidentV2()" class="success">POST /api/v2/incidents</button>
+      <div id="createResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- UPDATE Incident -->
+    <div class="test-section">
+      <h3>✏️ 3. Cập nhật incident (API V2) - Test Fix</h3>
+      <p><strong>Đây là test chính để kiểm tra fix cho 4 fields:</strong> title, description, affectedService, reportedBy</p>
+      
+      <div class="form-group">
+        <label>Incident ID:</label>
+        <input type="number" id="updateId" value="1" />
+      </div>
+      <div class="form-group">
+        <label>New Title (TEST FIELD):</label>
+        <input type="text" id="updateTitle" value="REFACTORED V2 TITLE" />
+      </div>
+      <div class="form-group">
+        <label>New Description (TEST FIELD):</label>
+        <textarea id="updateDescription">REFACTORED V2 Description - This should update successfully</textarea>
+      </div>
+      <div class="form-group">
+        <label>New Affected Service (TEST FIELD):</label>
+        <input type="text" id="updateService" value="REFACTORED V2 Service" />
+      </div>
+      <div class="form-group">
+        <label>New Reported By (TEST FIELD):</label>
+        <input type="text" id="updateReporter" value="REFACTORED V2 Reporter" />
+      </div>
+      <div class="form-group">
+        <label>Severity Level:</label>
+        <select id="updateSeverity">
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+          <option value="CRITICAL" selected>CRITICAL</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Assignee:</label>
+        <input type="text" id="updateAssignee" value="V2 Assignee Test" />
+      </div>
+      
+      <button onclick="updateIncidentV2()" class="success">PUT /api/v2/incidents/{id}</button>
+      <div id="updateResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Comparison Test -->
+    <div class="test-section">
+      <h3>🔍 4. So sánh API V1 vs V2</h3>
+      <button onclick="compareAPIs()">Compare Update Results</button>
+      <div id="compareResult" class="result" style="display:none;"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE_V1 = 'http://localhost:8080/api';
+    const API_BASE_V2 = 'http://localhost:8080/api/v2';
+
+    function log(elementId, message, isError = false) {
+      const element = document.getElementById(elementId);
+      element.style.display = 'block';
+      element.textContent = message;
+      element.className = isError ? 'result error' : 'result';
+    }
+
+    async function getAllIncidentsV2() {
+      try {
+        const response = await fetch(`${API_BASE_V2}/incidents`);
+        const data = await response.json();
+        log('getAllResult', JSON.stringify(data, null, 2));
+      } catch (error) {
+        log('getAllResult', `Error: ${error.message}`, true);
+      }
+    }
+
+    async function createIncidentV2() {
+      const payload = {
+        title: document.getElementById('createTitle').value,
+        description: document.getElementById('createDescription').value,
+        affectedService: document.getElementById('createService').value,
+        reportedBy: document.getElementById('createReporter').value,
+        severityLevel: document.getElementById('createSeverity').value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE_V2}/incidents`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        log('createResult', `Success!\n${JSON.stringify(data, null, 2)}`);
+        
+        // Auto-fill update form with new incident ID
+        document.getElementById('updateId').value = data.id;
+      } catch (error) {
+        log('createResult', `Error: ${error.message}`, true);
+      }
+    }
+
+    async function updateIncidentV2() {
+      const id = document.getElementById('updateId').value;
+      const payload = {
+        title: document.getElementById('updateTitle').value,
+        description: document.getElementById('updateDescription').value,
+        affectedService: document.getElementById('updateService').value,
+        reportedBy: document.getElementById('updateReporter').value,
+        severityLevel: document.getElementById('updateSeverity').value,
+        assignee: document.getElementById('updateAssignee').value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE_V2}/incidents/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        
+        // Check if problematic fields were updated
+        const expectedTitle = payload.title;
+        const actualTitle = data.title;
+        const expectedDescription = payload.description;
+        const actualDescription = data.description;
+        
+        let result = `Update API V2 Response:\n${JSON.stringify(data, null, 2)}\n\n`;
+        result += `=== VALIDATION ===\n`;
+        result += `Expected Title: "${expectedTitle}"\n`;
+        result += `Actual Title: "${actualTitle}"\n`;
+        result += `Title Updated: ${actualTitle === expectedTitle ? '✅ YES' : '❌ NO'}\n\n`;
+        result += `Expected Description: "${expectedDescription}"\n`;
+        result += `Actual Description: "${actualDescription}"\n`;
+        result += `Description Updated: ${actualDescription === expectedDescription ? '✅ YES' : '❌ NO'}\n`;
+        
+        log('updateResult', result, actualTitle !== expectedTitle || actualDescription !== expectedDescription);
+      } catch (error) {
+        log('updateResult', `Error: ${error.message}`, true);
+      }
+    }
+
+    async function compareAPIs() {
+      const testPayload = {
+        title: "COMPARISON TEST TITLE",
+        description: "COMPARISON TEST DESCRIPTION",
+        affectedService: "COMPARISON TEST SERVICE",
+        reportedBy: "COMPARISON TEST REPORTER",
+        severityLevel: "HIGH"
+      };
+
+      try {
+        // Test V1 API
+        const v1Response = await fetch(`${API_BASE_V1}/incidents/1`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(testPayload)
+        });
+        const v1Data = await v1Response.json();
+
+        // Test V2 API
+        const v2Response = await fetch(`${API_BASE_V2}/incidents/1`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(testPayload)
+        });
+        const v2Data = await v2Response.json();
+
+        let result = `=== COMPARISON V1 vs V2 ===\n\n`;
+        result += `V1 API Result:\n`;
+        result += `Title: "${v1Data.title}"\n`;
+        result += `Description: "${v1Data.description}"\n`;
+        result += `Affected Service: "${v1Data.affectedService}"\n`;
+        result += `Reported By: "${v1Data.reportedBy}"\n\n`;
+        
+        result += `V2 API Result:\n`;
+        result += `Title: "${v2Data.title}"\n`;
+        result += `Description: "${v2Data.description}"\n`;
+        result += `Affected Service: "${v2Data.affectedService}"\n`;
+        result += `Reported By: "${v2Data.reportedBy}"\n\n`;
+        
+        result += `=== ANALYSIS ===\n`;
+        result += `V1 Title Updated: ${v1Data.title === testPayload.title ? '✅' : '❌'}\n`;
+        result += `V2 Title Updated: ${v2Data.title === testPayload.title ? '✅' : '❌'}\n`;
+        result += `V1 Description Updated: ${v1Data.description === testPayload.description ? '✅' : '❌'}\n`;
+        result += `V2 Description Updated: ${v2Data.description === testPayload.description ? '✅' : '❌'}\n`;
+
+        log('compareResult', result);
+      } catch (error) {
+        log('compareResult', `Error: ${error.message}`, true);
+      }
+    }
+  </script>
+</body>
+</html>
