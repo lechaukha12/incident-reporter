@@ -4,6 +4,7 @@ import com.nganhang.sentinel.dto.IncidentCreateDTO;
 import com.nganhang.sentinel.dto.IncidentResponseDTO;
 import com.nganhang.sentinel.dto.IncidentUpdateDTO;
 import com.nganhang.sentinel.dto.TimelineUpdateDTO;
+import com.nganhang.sentinel.dto.TimelineResponseDTO;
 import com.nganhang.sentinel.model.Incident;
 import com.nganhang.sentinel.model.IncidentUpdate;
 import com.nganhang.sentinel.repository.IncidentRepository;
@@ -54,10 +55,10 @@ public class IncidentService {
         
         Incident savedIncident = incidentRepository.save(incident);
         
-        // Tạo bản ghi đầu tiên trong timeline
+                // Create initial timeline entry for newly created issue
         IncidentUpdate initialUpdate = IncidentUpdate.builder()
                 .incident(savedIncident)
-                .message("Sự cố được tạo và đang trong quá trình điều tra")
+                .message("Issue được tạo và đang trong quá trình điều tra")
                 .updateType(IncidentUpdate.UpdateType.STATUS_CHANGE)
                 .createdBy(dto.getReportedBy())
                 .build();
@@ -136,7 +137,7 @@ public class IncidentService {
     @Transactional(readOnly = true)
     public IncidentResponseDTO getIncidentById(Long id) {
         Incident incident = incidentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sự cố với ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy issue với ID: " + id));
         
         List<IncidentUpdate> updates = incidentUpdateRepository.findByIncidentOrderByCreatedAtDesc(incident);
         
@@ -152,7 +153,7 @@ public class IncidentService {
                 id, dto.getTitle(), dto.getDescription(), dto.getAffectedService(), dto.getReportedBy());
         
         Incident incident = incidentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sự cố với ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy issue với ID: " + id));
         
         logger.info("SERVICE: Before update - title={}, description={}, affectedService={}, reportedBy={}", 
                 incident.getTitle(), incident.getDescription(), incident.getAffectedService(), incident.getReportedBy());
@@ -213,7 +214,7 @@ public class IncidentService {
             System.out.println("SERVICE DEBUG - ReportedBy after set: '" + incident.getReportedBy() + "'");
         }
         
-        // Cập nhật thông tin sự cố
+        // Cập nhật thông tin issue
         if (dto.getStatus() != null) {
             incident.setStatus(dto.getStatus());
             // Tự động cập nhật trạng thái resolved dựa trên status
@@ -333,6 +334,53 @@ public class IncidentService {
             entityManager.flush();
             entityManager.clear();
             updatedIncident = incidentRepository.findById(id).orElseThrow();
+            
+            // Create timeline entries for changes
+            String updateBy = dto.getReportedBy() != null ? dto.getReportedBy() : "System";
+            
+            if (statusChanged) {
+                IncidentUpdate statusUpdate = IncidentUpdate.builder()
+                        .incident(updatedIncident)
+                        .message("Trạng thái đã được thay đổi thành: " + getStatusText(dto.getStatus()))
+                        .updateType(IncidentUpdate.UpdateType.STATUS_CHANGE)
+                        .createdBy(updateBy)
+                        .createdAt(LocalDateTime.now())
+                        .build();
+                incidentUpdateRepository.save(statusUpdate);
+            }
+            
+            if (severityChanged) {
+                IncidentUpdate severityUpdate = IncidentUpdate.builder()
+                        .incident(updatedIncident)
+                        .message("Mức độ nghiêm trọng đã được thay đổi thành: " + getSeverityText(dto.getSeverityLevel()))
+                        .updateType(IncidentUpdate.UpdateType.STATUS_CHANGE)
+                        .createdBy(updateBy)
+                        .createdAt(LocalDateTime.now())
+                        .build();
+                incidentUpdateRepository.save(severityUpdate);
+            }
+            
+            if (assigneeChanged) {
+                IncidentUpdate assigneeUpdate = IncidentUpdate.builder()
+                        .incident(updatedIncident)
+                        .message("Người phụ trách đã được chỉ định: " + dto.getAssignee())
+                        .updateType(IncidentUpdate.UpdateType.OTHER)
+                        .createdBy(updateBy)
+                        .createdAt(LocalDateTime.now())
+                        .build();
+                incidentUpdateRepository.save(assigneeUpdate);
+            }
+            
+            if (dto.getNotes() != null && !dto.getNotes().trim().isEmpty()) {
+                IncidentUpdate notesUpdate = IncidentUpdate.builder()
+                        .incident(updatedIncident)
+                        .message("Ghi chú đã được cập nhật: " + dto.getNotes())
+                        .updateType(IncidentUpdate.UpdateType.OTHER)
+                        .createdBy(updateBy)
+                        .createdAt(LocalDateTime.now())
+                        .build();
+                incidentUpdateRepository.save(notesUpdate);
+            }
         } catch (Exception e) {
             System.out.println("WORKAROUND ERROR: " + e.getMessage());
             logger.error("WORKAROUND ERROR: ", e);
@@ -350,7 +398,7 @@ public class IncidentService {
     @Transactional
     public IncidentResponseDTO addUpdate(Long incidentId, TimelineUpdateDTO dto) {
         Incident incident = incidentRepository.findById(incidentId)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sự cố với ID: " + incidentId));
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy issue với ID: " + incidentId));
         
         IncidentUpdate update = IncidentUpdate.builder()
                 .incident(incident)
@@ -364,6 +412,35 @@ public class IncidentService {
         List<IncidentUpdate> updates = incidentUpdateRepository.findByIncidentOrderByCreatedAtDesc(incident);
         
         return mapToResponseDTO(incident, updates);
+    }
+    
+    @Transactional
+    public IncidentResponseDTO resolveIncident(Long incidentId) {
+        Incident incident = incidentRepository.findById(incidentId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy issue với ID: " + incidentId));
+        
+        // Cập nhật trạng thái issue
+        incident.setStatus(Incident.IncidentStatus.RESOLVED);
+        incident.setResolved(true);
+        incident.setResolvedAt(LocalDateTime.now());
+        incident.setUpdatedAt(LocalDateTime.now());
+        
+        Incident savedIncident = incidentRepository.save(incident);
+        
+        // Tạo update trong timeline
+        IncidentUpdate resolveUpdate = IncidentUpdate.builder()
+                .incident(savedIncident)
+                .message("Issue đã được giải quyết")
+                .updateType(IncidentUpdate.UpdateType.RESOLUTION)
+                .createdBy("System")
+                .createdAt(LocalDateTime.now())
+                .build();
+        
+        incidentUpdateRepository.save(resolveUpdate);
+        
+        List<IncidentUpdate> updates = incidentUpdateRepository.findByIncidentOrderByCreatedAtDesc(savedIncident);
+        
+        return mapToResponseDTO(savedIncident, updates);
     }
     
     private IncidentResponseDTO mapToResponseDTO(Incident incident, List<IncidentUpdate> updates) {
@@ -428,6 +505,43 @@ public class IncidentService {
             result.put(status, incidentRepository.findByStatus(status, Pageable.unpaged()).getTotalElements());
         }
         return result;
+    }
+    
+    public List<TimelineResponseDTO> getIncidentTimeline(Long incidentId) {
+        Incident incident = incidentRepository.findById(incidentId)
+                .orElseThrow(() -> new EntityNotFoundException("Incident not found with id: " + incidentId));
+        
+        List<IncidentUpdate> updates = incidentUpdateRepository.findByIncidentOrderByCreatedAtDesc(incident);
+        
+        return updates.stream()
+                .map(update -> TimelineResponseDTO.builder()
+                        .id(update.getId())
+                        .message(update.getMessage())
+                        .updateType(update.getUpdateType())
+                        .createdBy(update.getCreatedBy())
+                        .timestamp(update.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+    
+    private String getStatusText(Incident.IncidentStatus status) {
+        switch (status) {
+            case INVESTIGATING: return "Đang điều tra";
+            case IDENTIFIED: return "Đã xác định";
+            case MONITORING: return "Đang theo dõi";
+            case RESOLVED: return "Đã giải quyết";
+            default: return status.toString();
+        }
+    }
+    
+    private String getSeverityText(Incident.SeverityLevel severity) {
+        switch (severity) {
+            case LOW: return "Thấp";
+            case MEDIUM: return "Trung bình";
+            case HIGH: return "Cao";
+            case CRITICAL: return "Nghiêm trọng";
+            default: return severity.toString();
+        }
     }
     
     // Xử lý webhook

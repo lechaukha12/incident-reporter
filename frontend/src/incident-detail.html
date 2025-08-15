@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Issue - Hệ thống Tuning OPS</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #0171bb;
+            --secondary-color: #ffde00;
+            --hover-primary: #014a8a;
+            --hover-secondary: #e6c700;
+            --bg-light: #f5f5f5;
+            --text-dark: #333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+        
+        .navbar-custom {
+            background-color: var(--secondary-color) !important;
+            padding: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-custom .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        
+        .btn-custom-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-custom-primary:hover {
+            background-color: var(--hover-primary);
+            border-color: var(--hover-primary);
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 2rem;
+            color: #dc3545;
+        }
+        
+        .bg-orange {
+            background-color: #fd7e14 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-shield-alt me-2"></i>
+                Hệ thống Tuning OPS
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Quay lại danh sách
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Loading State -->
+        <div id="loadingSection" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorSection" class="error-message d-none">
+            <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+            <h4>Không thể tải thông tin issue</h4>
+            <p id="errorMessage">Đã xảy ra lỗi khi tải dữ liệu.</p>
+            <button class="btn btn-custom-primary" onclick="loadIncidentDetail()">
+                <i class="fas fa-redo me-2"></i>Thử lại
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div id="contentSection" class="d-none">
+            <!-- Header with basic info -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2 id="incidentTitle" class="mb-2">Tiêu đề issue</h2>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="badge fs-6" id="statusBadge">Trạng thái</span>
+                        <span class="badge fs-6" id="severityBadge">Mức độ</span>
+                        <span class="text-muted">#<span id="incidentId">ID</span></span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-outline-primary mb-2 w-100" onclick="copyIncidentLink()">
+                        <i class="fas fa-copy me-2"></i>Copy Link
+                    </button>
+                    <div id="copySuccess" class="text-success small d-none">
+                        <i class="fas fa-check me-1"></i>Đã copy!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main info card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="text-muted mb-2">Mô tả</h6>
+                            <p id="incidentDescription" class="mb-3">Mô tả issue</p>
+                            
+                            <div id="notesSection" class="d-none">
+                                <h6 class="text-muted mb-2">Ghi chú</h6>
+                                <p id="incidentNotes" class="mb-3">Ghi chú</p>
+                            </div>
+                            
+                            <div id="rootCauseSection" class="d-none">
+                                <h6 class="text-muted mb-2">Nguyên nhân</h6>
+                                <p id="incidentRootCause" class="mb-0">Nguyên nhân</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row g-2 text-center">
+                                <div class="col-6">
+                                    <div class="border rounded p-2">
+                                        <small class="text-muted d-block">Người phụ trách</small>
+                                        <strong id="assignedTo">-</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border rounded p-2">
+                                        <small class="text-muted d-block">Dịch vụ</small>
+                                        <strong id="affectedService">-</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border rounded p-2">
+                                        <small class="text-muted d-block">Tạo lúc</small>
+                                        <small id="createdAt">-</small>
+                                    </div>
+                                </div>
+                                <div class="col-6" id="resolvedAtSection" style="display: none;">
+                                    <div class="border rounded p-2">
+                                        <small class="text-muted d-block">Giải quyết</small>
+                                        <small id="resolvedAt">-</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Lịch sử cập nhật
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="timelineContainer">
+                        <p class="text-muted mb-0">Đang tải...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="text-center">
+                <a href="index.html" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                </a>
+                <button class="btn btn-primary" onclick="openEditModal()">
+                    <i class="fas fa-edit me-2"></i>Chỉnh sửa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Get incident ID from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const incidentId = urlParams.get('id');
+        
+        if (!incidentId) {
+            document.getElementById('loadingSection').classList.add('d-none');
+            document.getElementById('errorSection').classList.remove('d-none');
+            document.getElementById('errorMessage').textContent = 'Không tìm thấy ID issue trong URL.';
+        } else {
+            loadIncidentDetail();
+        }
+        
+        async function loadIncidentDetail() {
+            try {
+                document.getElementById('loadingSection').classList.remove('d-none');
+                document.getElementById('errorSection').classList.add('d-none');
+                document.getElementById('contentSection').classList.add('d-none');
+                
+                const response = await fetch(`/api/incidents/${incidentId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const incident = await response.json();
+                displayIncidentDetail(incident);
+                
+                document.getElementById('loadingSection').classList.add('d-none');
+                document.getElementById('contentSection').classList.remove('d-none');
+                
+            } catch (error) {
+                console.error('Error loading incident:', error);
+                document.getElementById('loadingSection').classList.add('d-none');
+                document.getElementById('errorSection').classList.remove('d-none');
+                document.getElementById('errorMessage').textContent = `Lỗi: ${error.message}`;
+            }
+        }
+        
+        function displayIncidentDetail(incident) {
+            // Update title and basic info
+            document.getElementById('incidentTitle').textContent = incident.title;
+            document.getElementById('incidentId').textContent = incident.id;
+            document.title = `${incident.title} - Hệ thống Tuning OPS`;
+            
+            // Update status
+            const statusElement = document.getElementById('statusBadge');
+            statusElement.textContent = getStatusText(incident.status);
+            statusElement.className = `badge ${getStatusClass(incident.status)}`;
+            
+            // Update severity
+            const severityElement = document.getElementById('severityBadge');
+            severityElement.textContent = getSeverityText(incident.severityLevel);
+            severityElement.className = `badge ${getSeverityClass(incident.severityLevel)}`;
+            
+            // Update other fields
+            document.getElementById('assignedTo').textContent = incident.assignee || 'Chưa có';
+            document.getElementById('affectedService').textContent = incident.affectedService || 'Chưa có';
+            document.getElementById('createdAt').textContent = formatDate(incident.createdAt);
+            
+            // Show resolved time if resolved
+            if (incident.resolved) {
+                document.getElementById('resolvedAt').textContent = formatDate(incident.resolvedAt);
+                document.getElementById('resolvedAtSection').style.display = 'block';
+            }
+            
+            // Update description
+            document.getElementById('incidentDescription').textContent = incident.description || 'Không có mô tả';
+            
+            // Update notes if available
+            if (incident.notes && incident.notes.trim()) {
+                document.getElementById('incidentNotes').textContent = incident.notes;
+                document.getElementById('notesSection').classList.remove('d-none');
+            }
+            
+            // Update root cause if available
+            if (incident.rootCause && incident.rootCause.trim()) {
+                document.getElementById('incidentRootCause').textContent = incident.rootCause;
+                document.getElementById('rootCauseSection').classList.remove('d-none');
+            }
+            
+            // Load timeline
+            loadTimeline(incident.id);
+        }
+        
+        async function loadTimeline(incidentId) {
+            try {
+                const response = await fetch(`/api/incidents/${incidentId}/updates`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const updates = await response.json();
+                displayTimeline(updates);
+                
+            } catch (error) {
+                console.error('Error loading timeline:', error);
+                document.getElementById('timelineContainer').innerHTML = 
+                    '<p class="text-danger">Không thể tải lịch sử cập nhật</p>';
+            }
+        }
+        
+        function displayTimeline(updates) {
+            const container = document.getElementById('timelineContainer');
+            
+            if (!updates || updates.length === 0) {
+                container.innerHTML = '<p class="text-muted mb-0">Chưa có cập nhật nào</p>';
+                return;
+            }
+            
+            const timelineHtml = updates.map(update => `
+                <div class="d-flex align-items-start mb-3">
+                    <div class="bg-primary rounded-circle p-1 me-3 mt-1" style="width: 8px; height: 8px;"></div>
+                    <div class="flex-grow-1">
+                        <p class="mb-1">${update.message}</p>
+                        <small class="text-muted">${formatDate(update.timestamp)}</small>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = timelineHtml;
+        }
+        
+        function copyIncidentLink() {
+            const currentUrl = window.location.href;
+            navigator.clipboard.writeText(currentUrl).then(() => {
+                const successElement = document.getElementById('copySuccess');
+                successElement.classList.remove('d-none');
+                setTimeout(() => {
+                    successElement.classList.add('d-none');
+                }, 3000);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                alert('Không thể copy link. Hãy copy URL từ thanh địa chỉ.');
+            });
+        }
+        
+        function openEditModal() {
+            // Redirect to main page with edit mode
+            window.location.href = `index.html?edit=${incidentId}`;
+        }
+        
+        // Utility functions
+        function getStatusText(status) {
+            const statusMap = {
+                'OPEN': 'Mở',
+                'IN_PROGRESS': 'Đang xử lý',
+                'RESOLVED': 'Đã giải quyết',
+                'CLOSED': 'Đã đóng'
+            };
+            return statusMap[status] || status;
+        }
+        
+        function getStatusClass(status) {
+            const classMap = {
+                'OPEN': 'bg-danger',
+                'IN_PROGRESS': 'bg-warning text-dark',
+                'RESOLVED': 'bg-success',
+                'CLOSED': 'bg-secondary'
+            };
+            return classMap[status] || 'bg-secondary';
+        }
+        
+        function getSeverityText(severity) {
+            const severityMap = {
+                'LOW': 'Thấp',
+                'MEDIUM': 'Trung bình',
+                'HIGH': 'Cao',
+                'CRITICAL': 'Nghiêm trọng'
+            };
+            return severityMap[severity] || severity;
+        }
+        
+        function getSeverityClass(severity) {
+            const classMap = {
+                'LOW': 'bg-info text-dark',
+                'MEDIUM': 'bg-warning text-dark',
+                'HIGH': 'bg-orange text-white',
+                'CRITICAL': 'bg-danger'
+            };
+            return classMap[severity] || 'bg-secondary';
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('vi-VN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    </script>
+</body>
+</html>

@@ -67,7 +67,7 @@ public class IncidentControllerIntegrationTest {
                 .andExpect(jsonPath("$.timeline", hasSize(2)))
                 .andExpect(jsonPath("$.timeline[0].message", is("Test Update Message")));
 
-        // 3. Cập nhật trạng thái sự cố
+        // 3. Cập nhật trạng thái issue
         IncidentUpdateDTO incidentUpdateDTO = new IncidentUpdateDTO();
         incidentUpdateDTO.setStatus(Incident.IncidentStatus.IDENTIFIED);
         incidentUpdateDTO.setSeverityLevel(Incident.SeverityLevel.CRITICAL);
@@ -79,12 +79,12 @@ public class IncidentControllerIntegrationTest {
                 .andExpect(jsonPath("$.status", is("IDENTIFIED")))
                 .andExpect(jsonPath("$.severityLevel", is("CRITICAL")));
 
-        // 4. Lấy danh sách tất cả sự cố
+        // 4. Lấy danh sách tất cả issue
         mockMvc.perform(get("/api/incidents"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))));
 
-        // 5. Lấy thông tin sự cố theo ID
+        // 5. Lấy thông tin issue theo ID
         mockMvc.perform(get("/api/incidents/{id}", incidentId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(incidentId)))
@@ -92,7 +92,7 @@ public class IncidentControllerIntegrationTest {
                 .andExpect(jsonPath("$.status", is("IDENTIFIED")))
                 .andExpect(jsonPath("$.timeline", hasSize(2)));
 
-        // 6. Đánh dấu sự cố đã giải quyết
+        // 6. Đánh dấu issue đã giải quyết
         IncidentUpdateDTO resolveDTO = new IncidentUpdateDTO();
         resolveDTO.setStatus(Incident.IncidentStatus.RESOLVED);
         resolveDTO.setResolved(true);

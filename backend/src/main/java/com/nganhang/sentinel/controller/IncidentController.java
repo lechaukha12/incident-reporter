@@ -4,6 +4,7 @@ import com.nganhang.sentinel.dto.IncidentCreateDTO;
 import com.nganhang.sentinel.dto.IncidentResponseDTO;
 import com.nganhang.sentinel.dto.IncidentUpdateDTO;
 import com.nganhang.sentinel.dto.TimelineUpdateDTO;
+import com.nganhang.sentinel.dto.TimelineResponseDTO;
 import com.nganhang.sentinel.model.Incident;
 import com.nganhang.sentinel.service.IncidentService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -93,6 +95,16 @@ public class IncidentController {
             @PathVariable Long id,
             @Valid @RequestBody TimelineUpdateDTO dto) {
         return ResponseEntity.ok(incidentService.addUpdate(id, dto));
+    }
+    
+    @GetMapping("/{id}/updates")
+    public ResponseEntity<List<TimelineResponseDTO>> getIncidentTimeline(@PathVariable Long id) {
+        return ResponseEntity.ok(incidentService.getIncidentTimeline(id));
+    }
+    
+    @PutMapping("/{id}/resolve")
+    public ResponseEntity<IncidentResponseDTO> resolveIncident(@PathVariable Long id) {
+        return ResponseEntity.ok(incidentService.resolveIncident(id));
     }
     
     @GetMapping("/statistics")

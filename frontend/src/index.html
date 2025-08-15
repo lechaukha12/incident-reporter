@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Tuning OPS</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #0171bb;
+            --secondary-color: #ffde00;
+            --hover-primary: #014a8a;
+            --hover-secondary: #e6c700;
+            --bg-light: #f5f5f5;
+            --text-dark: #333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+        
+        .navbar-custom {
+            background-color: var(--secondary-color) !important;
+            padding: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-custom .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        
+        .btn-custom-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-custom-primary:hover {
+            background-color: var(--hover-primary);
+            border-color: var(--hover-primary);
+            color: white;
+        }
+        
+        .btn-custom-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            border-width: 2px;
+        }
+        
+        .btn-custom-secondary:hover {
+            background-color: var(--hover-secondary);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #025aa3 100%);
+            color: white;
+            padding: 1.5rem;
+            margin: 0;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            color: var(--text-dark);
+            padding: 1rem;
+        }
+        
+        .table td {
+            padding: 1rem;
+            border-color: #e9ecef;
+            vertical-align: middle;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .badge-status {
+            font-size: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+        }
+        
+        .status-investigating {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        .status-identified {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .status-monitoring {
+            background-color: #20c997;
+            color: white;
+        }
+        
+        .status-resolved {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .severity-critical {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .severity-high {
+            background-color: #fd7e14;
+            color: white;
+        }
+        
+        .severity-medium {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .severity-low {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .modal-header-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #025aa3 100%);
+            color: white;
+            border-bottom: none;
+        }
+        
+        .modal-header-custom .btn-close {
+            filter: invert(1);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(1, 113, 187, 0.25);
+        }
+        
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(1, 113, 187, 0.25);
+        }
+        
+        .action-buttons {
+            white-space: nowrap;
+        }
+        
+        .action-buttons .btn {
+            margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .action-buttons .btn:last-child {
+            margin-right: 0;
+        }
+        
+        .loading-spinner {
+            display: none;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .icon-status {
+            margin-right: 0.5rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-custom navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-shield-alt me-2"></i>
+                Hệ thống Tuning OPS
+            </a>
+            <button class="btn btn-custom-secondary" onclick="openCreateModal()">
+                <i class="fas fa-plus me-2"></i>
+                Tạo issue mới
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4" id="statsContainer">
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card h-100">
+                    <div class="card-body text-center">
+                        <div class="stats-number" id="totalIncidents">0</div>
+                        <div class="stats-label">
+                            <i class="fas fa-list me-1"></i>
+                            Tổng số issue
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card h-100">
+                    <div class="card-body text-center">
+                        <div class="stats-number" id="activeIncidents">0</div>
+                        <div class="stats-label">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Đang hoạt động
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card h-100">
+                    <div class="card-body text-center">
+                        <div class="stats-number" id="resolvedIncidents">0</div>
+                        <div class="stats-label">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Đã giải quyết
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card h-100">
+                    <div class="card-body text-center">
+                        <div class="stats-number" id="criticalIncidents">0</div>
+                        <div class="stats-label">
+                            <i class="fas fa-fire me-1"></i>
+                            Nghiêm trọng
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incidents Table -->
+        <div class="table-container fade-in">
+            <div class="table-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Danh sách issue
+                </h4>
+            </div>
+            <div class="p-3">
+                <!-- Loading Spinner -->
+                <div class="text-center loading-spinner" id="loadingSpinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+                
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="incidentsTable">
+                        <thead>
+                            <tr>
+                                <th width="5%">ID</th>
+                                <th width="20%">Tiêu đề</th>
+                                <th width="12%">Trạng thái</th>
+                                <th width="12%">Mức độ</th>
+                                <th width="15%">Dịch vụ</th>
+                                <th width="12%">Người phụ trách</th>
+                                <th width="12%">Người báo cáo</th>
+                                <th width="12%">Thời gian</th>
+                                <th width="10%">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidentsTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Empty State -->
+                <div class="empty-state d-none" id="emptyState">
+                    <i class="fas fa-inbox"></i>
+                    <h5>Chưa có issue nào</h5>
+                    <p>Hãy tạo issue mới để bắt đầu theo dõi.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Incident Modal -->
+    <div class="modal fade" id="createIncidentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Tạo issue mới
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createIncidentForm">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="title" class="form-label">
+                                    <i class="fas fa-heading me-1"></i>
+                                    Tiêu đề issue <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="title" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="severityLevel" class="form-label">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Mức độ nghiêm trọng
+                                </label>
+                                                                <select class="form-select" id="severityLevel" required>
+                                    <option value="">Chọn mức độ nghiêm trọng</option>
+                                    <option value="CRITICAL">Nghiêm trọng</option>
+                                    <option value="HIGH" selected>Cao</option>
+                                    <option value="MEDIUM">Trung bình</option>
+                                    <option value="LOW">Thấp</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>
+                                Mô tả
+                            </label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="affectedService" class="form-label">
+                                    <i class="fas fa-server me-1"></i>
+                                    Dịch vụ bị ảnh hưởng <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="affectedService" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="assignee" class="form-label">
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    Người phụ trách
+                                </label>
+                                <input type="text" class="form-control" id="assignee">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="reportedBy" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    Người báo cáo <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="reportedBy" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Trạng thái
+                                </label>
+                                <select class="form-select" id="status">
+                                    <option value="INVESTIGATING" selected>Đang xác định</option>
+                                    <option value="IDENTIFIED">Đã xác định</option>
+                                    <option value="MONITORING">Đang theo dõi</option>
+                                    <option value="RESOLVED">Đã giải quyết</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="notes" class="form-label">
+                                    <i class="fas fa-sticky-note me-1"></i>
+                                    Ghi chú
+                                </label>
+                                <textarea class="form-control" id="notes" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="rootCause" class="form-label">
+                                    <i class="fas fa-search me-1"></i>
+                                    Nguyên nhân gốc rễ
+                                </label>
+                                <textarea class="form-control" id="rootCause" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>
+                        Hủy bỏ
+                    </button>
+                    <button type="button" class="btn btn-custom-primary" onclick="createIncident()">
+                        <i class="fas fa-save me-1"></i>
+                        Tạo issue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Incident Modal -->
+    <div class="modal fade" id="editIncidentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>
+                        Cập nhật issue
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editIncidentForm">
+                        <input type="hidden" id="editId">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="editTitle" class="form-label">
+                                    <i class="fas fa-heading me-1"></i>
+                                    Tiêu đề issue
+                                </label>
+                                <input type="text" class="form-control" id="editTitle">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="editSeverityLevel" class="form-label">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Mức độ nghiêm trọng
+                                </label>
+                                <select class="form-select" id="editSeverityLevel">
+                                    <option value="CRITICAL">Nghiêm trọng</option>
+                                    <option value="HIGH">Cao</option>
+                                    <option value="MEDIUM">Trung bình</option>
+                                    <option value="LOW">Thấp</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDescription" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>
+                                Mô tả
+                            </label>
+                            <textarea class="form-control" id="editDescription" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editAffectedService" class="form-label">
+                                    <i class="fas fa-server me-1"></i>
+                                    Dịch vụ bị ảnh hưởng
+                                </label>
+                                <input type="text" class="form-control" id="editAffectedService">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editAssignee" class="form-label">
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    Người phụ trách
+                                </label>
+                                <input type="text" class="form-control" id="editAssignee">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editReportedBy" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    Người báo cáo
+                                </label>
+                                <input type="text" class="form-control" id="editReportedBy">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editStatus" class="form-label">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Trạng thái
+                                </label>
+                                <select class="form-select" id="editStatus">
+                                    <option value="INVESTIGATING">Đang xác định</option>
+                                    <option value="IDENTIFIED">Đã xác định</option>
+                                    <option value="MONITORING">Đang theo dõi</option>
+                                    <option value="RESOLVED">Đã giải quyết</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editNotes" class="form-label">
+                                    <i class="fas fa-sticky-note me-1"></i>
+                                    Ghi chú
+                                </label>
+                                <textarea class="form-control" id="editNotes" rows="2"></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editRootCause" class="form-label">
+                                    <i class="fas fa-search me-1"></i>
+                                    Nguyên nhân gốc rễ
+                                </label>
+                                <textarea class="form-control" id="editRootCause" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>
+                        Hủy bỏ
+                    </button>
+                    <button type="button" class="btn btn-custom-primary" onclick="updateIncident()">
+                        <i class="fas fa-save me-1"></i>
+                        Cập nhật
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Configuration
+        const API_BASE_URL = '/api';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchStats();
+            fetchIncidents();
+            checkEditMode();
+        });
+        
+        // Fetch statistics
+        function fetchStats() {
+            fetch(`${API_BASE_URL}/incidents/stats`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalIncidents').textContent = data.totalIncidents || 0;
+                    document.getElementById('activeIncidents').textContent = data.activeIncidents || 0;
+                    document.getElementById('resolvedIncidents').textContent = data.resolvedIncidents || 0;
+                    
+                    // Calculate critical incidents
+                    const critical = data.bySeverity ? (data.bySeverity.CRITICAL || 0) : 0;
+                    document.getElementById('criticalIncidents').textContent = critical;
+                })
+                .catch(error => {
+                    console.error('Error fetching stats:', error);
+                });
+        }
+        
+        // Fetch incidents
+        function fetchIncidents() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const tableBody = document.getElementById('incidentsTableBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            loadingSpinner.style.display = 'block';
+            
+            fetch(`${API_BASE_URL}/incidents`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingSpinner.style.display = 'none';
+                    
+                    if (data.content && data.content.length > 0) {
+                        tableBody.innerHTML = data.content.map(incident => `
+                            <tr>
+                                <td><strong>#${incident.id}</strong></td>
+                                <td>
+                                    <div class="fw-semibold">${incident.title}</div>
+                                    ${incident.description ? `<small class="text-muted">${incident.description.substring(0, 50)}${incident.description.length > 50 ? '...' : ''}</small>` : ''}
+                                </td>
+                                <td>
+                                    <span class="badge badge-status status-${incident.status.toLowerCase()}">
+                                        ${getStatusIcon(incident.status)} ${getStatusLabel(incident.status)}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-status severity-${incident.severityLevel.toLowerCase()}">
+                                        ${getSeverityIcon(incident.severityLevel)} ${getSeverityLabel(incident.severityLevel)}
+                                    </span>
+                                </td>
+                                <td>${incident.affectedService || '<span class="text-muted">-</span>'}</td>
+                                <td>${incident.assignee || '<span class="text-muted">-</span>'}</td>
+                                <td>${incident.reportedBy || '<span class="text-muted">-</span>'}</td>
+                                <td>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        ${formatDate(incident.createdAt)}
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline-info" onclick="viewIncidentDetail(${incident.id})" title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(${incident.id})" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        ${incident.status !== 'RESOLVED' ? `
+                                            <button class="btn btn-sm btn-outline-success" onclick="resolveIncident(${incident.id})" title="Giải quyết">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('');
+                        emptyState.classList.add('d-none');
+                    } else {
+                        tableBody.innerHTML = '';
+                        emptyState.classList.remove('d-none');
+                    }
+                })
+                .catch(error => {
+                    loadingSpinner.style.display = 'none';
+                    console.error('Error fetching incidents:', error);
+                    showToast('Lỗi khi tải danh sách issue', 'error');
+                });
+        }
+        
+        // Modal functions
+        function openCreateModal() {
+            const modal = new bootstrap.Modal(document.getElementById('createIncidentModal'));
+            document.getElementById('createIncidentForm').reset();
+            modal.show();
+        }
+        
+        function openEditModal(incidentId) {
+            fetch(`${API_BASE_URL}/incidents/${incidentId}`)
+                .then(response => response.json())
+                .then(incident => {
+                    document.getElementById('editId').value = incident.id;
+                    document.getElementById('editTitle').value = incident.title || '';
+                    document.getElementById('editDescription').value = incident.description || '';
+                    document.getElementById('editSeverityLevel').value = incident.severityLevel || 'HIGH';
+                    document.getElementById('editAffectedService').value = incident.affectedService || '';
+                    document.getElementById('editAssignee').value = incident.assignee || '';
+                    document.getElementById('editReportedBy').value = incident.reportedBy || '';
+                    document.getElementById('editStatus').value = incident.status || 'INVESTIGATING';
+                    document.getElementById('editNotes').value = incident.notes || '';
+                    document.getElementById('editRootCause').value = incident.rootCause || '';
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('editIncidentModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error fetching incident:', error);
+                    showToast('Lỗi khi tải thông tin issue', 'error');
+                });
+        }
+        
+        // Create incident
+        function createIncident() {
+            const newIncident = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                status: document.getElementById('status').value,
+                severityLevel: document.getElementById('severityLevel').value,
+                affectedService: document.getElementById('affectedService').value,
+                assignee: document.getElementById('assignee').value,
+                reportedBy: document.getElementById('reportedBy').value,
+                notes: document.getElementById('notes').value,
+                rootCause: document.getElementById('rootCause').value
+            };
+            
+            if (!newIncident.title || !newIncident.affectedService || !newIncident.reportedBy) {
+                showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'warning');
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/incidents`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newIncident)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                bootstrap.Modal.getInstance(document.getElementById('createIncidentModal')).hide();
+                fetchStats();
+                fetchIncidents();
+                showToast('Đã tạo issue mới thành công!', 'success');
+            })
+            .catch(error => {
+                console.error('Error creating incident:', error);
+                showToast(`Lỗi khi tạo issue: ${error.message}`, 'error');
+            });
+        }
+        
+        // Update incident
+        function updateIncident() {
+            const incidentId = document.getElementById('editId').value;
+            const updatedIncident = {
+                title: document.getElementById('editTitle').value,
+                description: document.getElementById('editDescription').value,
+                status: document.getElementById('editStatus').value,
+                severityLevel: document.getElementById('editSeverityLevel').value,
+                affectedService: document.getElementById('editAffectedService').value,
+                assignee: document.getElementById('editAssignee').value,
+                reportedBy: document.getElementById('editReportedBy').value,
+                notes: document.getElementById('editNotes').value,
+                rootCause: document.getElementById('editRootCause').value
+            };
+            
+            fetch(`${API_BASE_URL}/incidents/${incidentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedIncident)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                bootstrap.Modal.getInstance(document.getElementById('editIncidentModal')).hide();
+                fetchStats();
+                fetchIncidents();
+                showToast('Đã cập nhật issue thành công!', 'success');
+            })
+            .catch(error => {
+                console.error('Error updating incident:', error);
+                showToast(`Lỗi khi cập nhật issue: ${error.message}`, 'error');
+            });
+        }
+        
+        // Resolve incident
+        function resolveIncident(incidentId) {
+            if (!confirm('Bạn có chắc chắn muốn đánh dấu issue này là đã giải quyết?')) {
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/incidents/${incidentId}/resolve`, {
+                method: 'PUT'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                fetchStats();
+                fetchIncidents();
+                showToast('Issue đã được đánh dấu là đã giải quyết!', 'success');
+            })
+            .catch(error => {
+                console.error('Error resolving incident:', error);
+                showToast(`Lỗi khi giải quyết issue: ${error.message}`, 'error');
+            });
+        }
+        
+        // Utility functions
+        function getStatusLabel(status) {
+            const labels = {
+                'INVESTIGATING': 'Đang xác định',
+                'IDENTIFIED': 'Đã xác định',
+                'MONITORING': 'Đang theo dõi',
+                'RESOLVED': 'Đã giải quyết'
+            };
+            return labels[status] || status;
+        }
+        
+        function getStatusIcon(status) {
+            const icons = {
+                'INVESTIGATING': '<i class="fas fa-search"></i>',
+                'IDENTIFIED': '<i class="fas fa-check"></i>',
+                'MONITORING': '<i class="fas fa-eye"></i>',
+                'RESOLVED': '<i class="fas fa-check-circle"></i>',
+                'OPEN': '<i class="fas fa-exclamation"></i>',
+                'IN_PROGRESS': '<i class="fas fa-cog fa-spin"></i>',
+                'CLOSED': '<i class="fas fa-times-circle"></i>'
+            };
+            return icons[status] || '<i class="fas fa-file-alt"></i>';
+        }
+        
+        function getSeverityLabel(severity) {
+            const labels = {
+                'CRITICAL': 'Nghiêm trọng',
+                'HIGH': 'Cao',
+                'MEDIUM': 'Trung bình',
+                'LOW': 'Thấp'
+            };
+            return labels[severity] || severity;
+        }
+        
+        function getSeverityIcon(severity) {
+            const icons = {
+                'CRITICAL': '<i class="fas fa-exclamation-triangle"></i>',
+                'HIGH': '<i class="fas fa-exclamation-circle"></i>',
+                'MEDIUM': '<i class="fas fa-info-circle"></i>',
+                'LOW': '<i class="fas fa-check-circle"></i>'
+            };
+            return icons[severity] || '<i class="fas fa-circle"></i>';
+        }
+        
+        // View incident detail
+        function viewIncidentDetail(incidentId) {
+            window.location.href = `incident-detail.html?id=${incidentId}`;
+        }
+        
+        // Check for edit mode from URL parameter
+        function checkEditMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('edit');
+            if (editId) {
+                // Remove the parameter from URL without reload
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+                
+                // Open edit modal for the incident
+                setTimeout(() => {
+                    openEditModal(editId);
+                }, 500); // Small delay to ensure data is loaded
+            }
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+        }
+        
+        function showToast(message, type = 'info') {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '1055';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Create toast
+            const toastId = 'toast-' + Date.now();
+            const bgClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : type === 'warning' ? 'bg-warning' : 'bg-primary';
+            const textClass = type === 'warning' ? 'text-dark' : 'text-white';
+            
+            const toastHtml = `
+                <div id="${toastId}" class="toast ${bgClass} ${textClass}" role="alert">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            // Show toast
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+            toast.show();
+            
+            // Remove toast after hide
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+    </script>
+</body>
+</html>

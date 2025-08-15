@@ -1,7 +1,8 @@
 FROM nginx:alpine
 
 # Sao chép tệp HTML tĩnh
-COPY ./src/fallback-index.html /usr/share/nginx/html/index.html
+COPY ./src/index.html /usr/share/nginx/html/index.html
+COPY ./src/incident-detail.html /usr/share/nginx/html/incident-detail.html
 COPY ./src/api-test-standalone.html /usr/share/nginx/html/api-test.html
 COPY ./src/connection-test.html /usr/share/nginx/html/connection-test.html
 

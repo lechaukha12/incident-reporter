@@ -92,7 +92,7 @@
                 })
                 .then(data => {
                     resultElement.innerHTML += `
-                        <p class="status-ok">✅ Connection successful!</p>
+                        <p class="status-ok"><i class="fas fa-check-circle"></i> Connection successful!</p>
                         <pre>${JSON.stringify(data, null, 2)}</pre>
                     `;
                 })

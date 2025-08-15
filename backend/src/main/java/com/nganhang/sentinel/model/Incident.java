@@ -80,7 +80,7 @@ public class Incident {
     }
 
     public enum SeverityLevel {
-        CRITICAL, // Nghiêm trọng - Sự cố ảnh hưởng đến nhiều người dùng
+        CRITICAL, // Nghiêm trọng - Issue ảnh hưởng đến nhiều người dùng
         HIGH,     // Cao - Vấn đề chức năng quan trọng ảnh hưởng đến một số người dùng
         MEDIUM,   // Trung bình - Vấn đề chức năng nhỏ ảnh hưởng đến ít người dùng
         LOW       // Thấp - Tác động tối thiểu, thường cho cải tiến hoặc sửa lỗi không khẩn cấp
