@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Hệ thống Tuning OPS</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #0171bb;
+            --secondary-color: #ffde00;
+            --hover-primary: #014a8a;
+            --hover-secondary: #e6c700;
+            --bg-light: #f5f5f5;
+            --text-dark: #333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+        
+        .navbar-custom {
+            background-color: var(--secondary-color) !important;
+            padding: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-custom .navbar-text {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        
+        .btn-custom-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom-primary:hover {
+            background-color: var(--hover-primary);
+            border-color: var(--hover-primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .btn-custom-secondary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom-secondary:hover {
+            background-color: var(--hover-primary);
+            border-color: var(--hover-primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .metric-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            font-size: 1rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chart-container canvas {
+            max-width: 100%;
+            flex: 1; /* Take remaining space */
+        }
+        
+        /* Specific adjustments for different chart types */
+        .severity-chart-container {
+            height: 450px;
+        }
+        
+        .trend-chart-container {
+            height: 450px;
+        }
+        
+        .service-chart-container {
+            height: 450px;
+        }
+        
+        .heatmap-chart-container {
+            height: 450px;
+        }
+        
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .nav-link {
+            color: var(--primary-color) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--hover-primary) !important;
+            text-decoration: none;
+        }
+        
+        .nav-link.active {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+            border-radius: 8px;
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+        
+        .heatmap-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1px;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            justify-content: space-between;
+        }
+        
+        #heatmapContainer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0; /* Allow shrinking */
+        }
+        
+        .heatmap-hour {
+            width: calc((100% - 23px) / 24); /* 24 items with 1px gaps */
+            aspect-ratio: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: white;
+            position: relative;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .heatmap-hour:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        
+        .heatmap-legend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-custom navbar-expand-lg">
+        <div class="container">
+            <div class="navbar-nav me-auto">
+                <span class="navbar-text">
+                    Hệ thống Tuning OPS
+                </span>
+            </div>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-list me-1"></i>
+                    Danh sách Issue
+                </a>
+                <a class="nav-link active" href="dashboard.html">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Dashboard
+                </a>
+                <a class="nav-link" href="users.html">
+                    <i class="fas fa-users me-1"></i>
+                    Người dùng
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-6 fw-bold text-center mb-4">
+                    <i class="fas fa-chart-bar me-3"></i>
+                    Dashboard Analytics
+                </h1>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div id="metricsSection" class="row mb-4" style="display: none;">
+            <div class="col-md-3 mb-3">
+                <div class="metric-card text-center">
+                    <div class="metric-number" id="totalIncidents">0</div>
+                    <div class="metric-label">
+                        <i class="fas fa-list me-1"></i>
+                        Tổng số Issue
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="metric-card text-center">
+                    <div class="metric-number text-warning" id="openIncidents">0</div>
+                    <div class="metric-label">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Đang hoạt động
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="metric-card text-center">
+                    <div class="metric-number text-success" id="resolvedIncidents">0</div>
+                    <div class="metric-label">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Đã giải quyết
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="metric-card text-center">
+                    <div class="metric-number text-info" id="avgResolutionTime">0</div>
+                    <div class="metric-label">
+                        <i class="fas fa-clock me-1"></i>
+                        Thời gian TB (giờ)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div id="chartsSection" class="row" style="display: none;">
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container severity-chart-container">
+                    <h3 class="chart-title">Phân bố theo độ nghiêm trọng</h3>
+                    <canvas id="severityChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container trend-chart-container">
+                    <h3 class="chart-title">Xu hướng 7 ngày qua</h3>
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container service-chart-container">
+                    <h3 class="chart-title">Top dịch vụ bị ảnh hưởng</h3>
+                    <canvas id="serviceChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="chart-container heatmap-chart-container">
+                    <h3 class="chart-title">Heatmap theo giờ trong ngày</h3>
+                    <div id="heatmapContainer">
+                        <div class="heatmap-container" id="heatmap"></div>
+                        <div class="heatmap-legend">
+                            <span>Ít</span>
+                            <div style="width: 100px; height: 20px; background: linear-gradient(to right, #e8f4fd, #0171bb); border-radius: 4px;"></div>
+                            <span>Nhiều</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+        
+        // Chart instances
+        let severityChart, trendChart, serviceChart;
+        
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                showLoading(true);
+                const response = await fetch(`${API_BASE_URL}/analytics/dashboard`);
+                const data = await response.json();
+                
+                updateMetrics(data);
+                createCharts(data);
+                createHeatmap(data.incidentsByHour);
+                
+                showLoading(false);
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showLoading(false);
+                alert('Lỗi khi tải dữ liệu dashboard: ' + error.message);
+            }
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+            document.getElementById('metricsSection').style.display = show ? 'none' : 'flex';
+            document.getElementById('chartsSection').style.display = show ? 'none' : 'flex';
+        }
+        
+        function updateMetrics(data) {
+            document.getElementById('totalIncidents').textContent = data.totalIncidents || 0;
+            document.getElementById('openIncidents').textContent = data.openIncidents || 0;
+            document.getElementById('resolvedIncidents').textContent = data.resolvedIncidents || 0;
+            document.getElementById('avgResolutionTime').textContent = 
+                Math.round((data.averageResolutionTimeHours || 0) * 10) / 10;
+        }
+        
+        function createCharts(data) {
+            createSeverityChart(data.incidentsBySeverity);
+            createTrendChart(data.incidentsTrend);
+            createServiceChart(data.incidentsByService);
+        }
+        
+        function createSeverityChart(severityData) {
+            console.log('Creating severity chart with data:', severityData);
+            const ctx = document.getElementById('severityChart').getContext('2d');
+            
+            if (!ctx) {
+                console.error('Canvas context not found');
+                return;
+            }
+            
+            if (severityChart) {
+                severityChart.destroy();
+            }
+            
+            const labels = Object.keys(severityData || {});
+            const values = Object.values(severityData || {});
+            const colors = ['#dc3545', '#fd7e14', '#ffc107', '#28a745'];
+            
+            console.log('Chart data:', { labels, values });
+            
+            try {
+                severityChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: colors.slice(0, labels.length),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    font: {
+                                        size: 12
+                                    },
+                                    usePointStyle: true
+                                }
+                            }
+                        }
+                    }
+                });
+                console.log('Severity chart created successfully');
+            } catch (error) {
+                console.error('Error creating severity chart:', error);
+            }
+        }
+        
+        function createTrendChart(trendData) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            if (trendChart) {
+                trendChart.destroy();
+            }
+            
+            const labels = Object.keys(trendData || {});
+            const values = Object.values(trendData || {});
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Issues per day',
+                        data: values,
+                        borderColor: '#0171bb',
+                        backgroundColor: 'rgba(1, 113, 187, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#0171bb',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createServiceChart(serviceData) {
+            const ctx = document.getElementById('serviceChart').getContext('2d');
+            
+            if (serviceChart) {
+                serviceChart.destroy();
+            }
+            
+            const labels = Object.keys(serviceData || {});
+            const values = Object.values(serviceData || {});
+            
+            serviceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Issues',
+                        data: values,
+                        backgroundColor: '#0171bb',
+                        borderColor: '#014a8a',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createHeatmap(hourlyData) {
+            const heatmapContainer = document.getElementById('heatmap');
+            heatmapContainer.innerHTML = '';
+            
+            if (!hourlyData) return;
+            
+            const maxValue = Math.max(...Object.values(hourlyData));
+            
+            for (let hour = 0; hour < 24; hour++) {
+                const value = hourlyData[hour] || 0;
+                const intensity = maxValue > 0 ? value / maxValue : 0;
+                
+                const hourElement = document.createElement('div');
+                hourElement.className = 'heatmap-hour';
+                hourElement.textContent = hour;
+                hourElement.title = `${hour}:00 - ${value} issues`;
+                
+                const opacity = 0.2 + (intensity * 0.8);
+                hourElement.style.backgroundColor = `rgba(1, 113, 187, ${opacity})`;
+                
+                heatmapContainer.appendChild(hourElement);
+            }
+        }
+        
+        // Load dashboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js not loaded');
+                setTimeout(loadDashboard, 1000); // Retry after 1 second
+            } else {
+                console.log('Chart.js loaded, version:', Chart.version);
+                loadDashboard();
+            }
+        });
+        
+        // Fallback for slow Chart.js loading
+        window.addEventListener('load', function() {
+            if (typeof Chart !== 'undefined' && !severityChart) {
+                console.log('Window loaded, retrying dashboard load');
+                loadDashboard();
+            }
+        });
+    </script>
+</body>
+</html>

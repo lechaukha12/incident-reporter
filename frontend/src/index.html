@@ -43,7 +43,7 @@
         .navbar-custom .navbar-text {
             color: var(--primary-color) !important;
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1.5rem;
         }
         
         .btn-custom-primary {
@@ -69,6 +69,17 @@
             background-color: var(--hover-secondary);
             border-color: var(--primary-color);
             color: var(--primary-color);
+        }
+        
+        .nav-link {
+            color: var(--primary-color) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--hover-primary) !important;
+            text-decoration: none;
         }
         
         .stats-card {
@@ -257,7 +268,15 @@
                 </span>
             </div>
             <div class="navbar-nav ms-auto">
-                <button class="btn btn-custom-secondary" onclick="openCreateModal()">
+                <a class="nav-link me-3" href="dashboard.html">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Dashboard
+                </a>
+                <a class="nav-link me-3" href="users.html">
+                    <i class="fas fa-users me-1"></i>
+                    Người dùng
+                </a>
+                <button class="btn btn-custom-secondary" onclick="openCreateIncidentModal()">
                     <i class="fas fa-plus me-2"></i>
                     Tạo issue mới
                 </button>
@@ -324,6 +343,86 @@
                 </h4>
             </div>
             <div class="p-3">
+                <!-- Search & Filter Section -->
+                <div class="row mb-4" id="searchFilterSection">
+                    <div class="col-md-6 mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchInput" 
+                                   placeholder="Tìm kiếm theo tiêu đề, mô tả, dịch vụ...">
+                            <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="INVESTIGATING">Đang điều tra</option>
+                                    <option value="IDENTIFIED">Đã xác định</option>
+                                    <option value="MONITORING">Đang giám sát</option>
+                                    <option value="RESOLVED">Đã giải quyết</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="severityFilter">
+                                    <option value="">Tất cả mức độ</option>
+                                    <option value="CRITICAL">Nghiêm trọng</option>
+                                    <option value="HIGH">Cao</option>
+                                    <option value="MEDIUM">Trung bình</option>
+                                    <option value="LOW">Thấp</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="assigneeFilter">
+                                    <option value="">Tất cả người phụ trách</option>
+                                    <!-- Will be populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input type="date" class="form-control" id="dateFromFilter" placeholder="Từ ngày">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="date" class="form-control" id="dateToFilter" placeholder="Đến ngày">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="sortBy">
+                                    <option value="createdAt_desc">Mới nhất</option>
+                                    <option value="createdAt_asc">Cũ nhất</option>
+                                    <option value="severity_desc">Mức độ cao → thấp</option>
+                                    <option value="severity_asc">Mức độ thấp → cao</option>
+                                    <option value="title_asc">Tiêu đề A-Z</option>
+                                    <option value="title_desc">Tiêu đề Z-A</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-primary w-100" id="resetFilters">
+                                    <i class="fas fa-undo me-1"></i>
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Filter Summary -->
+                    <div class="col-12" id="filterSummary" style="display: none;">
+                        <div class="alert alert-info py-2">
+                            <small>
+                                <i class="fas fa-filter me-1"></i>
+                                <span id="filterSummaryText"></span>
+                                <span id="filteredCount" class="fw-bold"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Loading Spinner -->
                 <div class="text-center loading-spinner" id="loadingSpinner">
                     <div class="spinner-border text-primary" role="status">
@@ -595,7 +694,8 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             fetchStats();
-            fetchIncidents();
+            initializeSearchAndFilter();
+            fetchIncidentsWithFilter();
             checkEditMode();
         });
         
@@ -617,78 +717,8 @@
                 });
         }
         
-        // Fetch incidents
-        function fetchIncidents() {
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const tableBody = document.getElementById('incidentsTableBody');
-            const emptyState = document.getElementById('emptyState');
-            
-            loadingSpinner.style.display = 'block';
-            
-            fetch(`${API_BASE_URL}/incidents`)
-                .then(response => response.json())
-                .then(data => {
-                    loadingSpinner.style.display = 'none';
-                    
-                    if (data.content && data.content.length > 0) {
-                        tableBody.innerHTML = data.content.map(incident => `
-                            <tr>
-                                <td><strong>#${incident.id}</strong></td>
-                                <td>
-                                    <div class="fw-semibold">${incident.title}</div>
-                                    ${incident.description ? `<small class="text-muted">${incident.description.substring(0, 50)}${incident.description.length > 50 ? '...' : ''}</small>` : ''}
-                                </td>
-                                <td>
-                                    <span class="badge badge-status status-${incident.status.toLowerCase()}">
-                                        ${getStatusIcon(incident.status)} ${getStatusLabel(incident.status)}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-status severity-${incident.severityLevel.toLowerCase()}">
-                                        ${getSeverityIcon(incident.severityLevel)} ${getSeverityLabel(incident.severityLevel)}
-                                    </span>
-                                </td>
-                                <td>${incident.affectedService || '<span class="text-muted">-</span>'}</td>
-                                <td>${incident.assignee || '<span class="text-muted">-</span>'}</td>
-                                <td>${incident.reportedBy || '<span class="text-muted">-</span>'}</td>
-                                <td>
-                                    <small class="text-muted">
-                                        <i class="fas fa-clock me-1"></i>
-                                        ${formatDate(incident.createdAt)}
-                                    </small>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="btn btn-sm btn-outline-info" onclick="viewIncidentDetail(${incident.id})" title="Xem chi tiết">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(${incident.id})" title="Chỉnh sửa">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        ${incident.status !== 'RESOLVED' ? `
-                                            <button class="btn btn-sm btn-outline-success" onclick="resolveIncident(${incident.id})" title="Giải quyết">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        ` : ''}
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('');
-                        emptyState.classList.add('d-none');
-                    } else {
-                        tableBody.innerHTML = '';
-                        emptyState.classList.remove('d-none');
-                    }
-                })
-                .catch(error => {
-                    loadingSpinner.style.display = 'none';
-                    console.error('Error fetching incidents:', error);
-                    showToast('Lỗi khi tải danh sách issue', 'error');
-                });
-        }
-        
         // Modal functions
-        function openCreateModal() {
+        function openCreateIncidentModal() {
             const modal = new bootstrap.Modal(document.getElementById('createIncidentModal'));
             document.getElementById('createIncidentForm').reset();
             modal.show();
@@ -749,7 +779,7 @@
             .then(data => {
                 bootstrap.Modal.getInstance(document.getElementById('createIncidentModal')).hide();
                 fetchStats();
-                fetchIncidents();
+                fetchIncidentsWithFilter();
                 showToast('Đã tạo issue mới thành công!', 'success');
             })
             .catch(error => {
@@ -785,7 +815,7 @@
             .then(data => {
                 bootstrap.Modal.getInstance(document.getElementById('editIncidentModal')).hide();
                 fetchStats();
-                fetchIncidents();
+                fetchIncidentsWithFilter();
                 showToast('Đã cập nhật issue thành công!', 'success');
             })
             .catch(error => {
@@ -809,7 +839,7 @@
             })
             .then(data => {
                 fetchStats();
-                fetchIncidents();
+                fetchIncidentsWithFilter();
                 showToast('Issue đã được đánh dấu là đã giải quyết!', 'success');
             })
             .catch(error => {
@@ -925,6 +955,276 @@
             toastElement.addEventListener('hidden.bs.toast', () => {
                 toastElement.remove();
             });
+        }
+
+        // Global variables for filter
+        let allIncidents = [];
+        let filteredIncidents = [];
+
+        // Initialize search and filter functionality
+        function initializeSearchAndFilter() {
+            // Search input
+            const searchInput = document.getElementById('searchInput');
+            const clearSearch = document.getElementById('clearSearch');
+            
+            // Filter selects
+            const statusFilter = document.getElementById('statusFilter');
+            const severityFilter = document.getElementById('severityFilter');
+            const assigneeFilter = document.getElementById('assigneeFilter');
+            const dateFromFilter = document.getElementById('dateFromFilter');
+            const dateToFilter = document.getElementById('dateToFilter');
+            const sortBy = document.getElementById('sortBy');
+            const resetFilters = document.getElementById('resetFilters');
+
+            // Event listeners
+            searchInput.addEventListener('input', debounce(applyFilters, 300));
+            clearSearch.addEventListener('click', () => {
+                searchInput.value = '';
+                applyFilters();
+            });
+
+            statusFilter.addEventListener('change', applyFilters);
+            severityFilter.addEventListener('change', applyFilters);
+            assigneeFilter.addEventListener('change', applyFilters);
+            dateFromFilter.addEventListener('change', applyFilters);
+            dateToFilter.addEventListener('change', applyFilters);
+            sortBy.addEventListener('change', applyFilters);
+
+            resetFilters.addEventListener('click', () => {
+                searchInput.value = '';
+                statusFilter.value = '';
+                severityFilter.value = '';
+                assigneeFilter.value = '';
+                dateFromFilter.value = '';
+                dateToFilter.value = '';
+                sortBy.value = 'createdAt_desc';
+                applyFilters();
+            });
+        }
+
+        // Debounce function for search
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Apply all filters
+        function applyFilters() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const severityFilter = document.getElementById('severityFilter').value;
+            const assigneeFilter = document.getElementById('assigneeFilter').value;
+            const dateFromFilter = document.getElementById('dateFromFilter').value;
+            const dateToFilter = document.getElementById('dateToFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            // Filter incidents
+            filteredIncidents = allIncidents.filter(incident => {
+                // Search filter
+                if (searchQuery) {
+                    const searchText = [
+                        incident.title,
+                        incident.description,
+                        incident.affectedService,
+                        incident.assignee,
+                        incident.reportedBy
+                    ].join(' ').toLowerCase();
+                    
+                    if (!searchText.includes(searchQuery)) {
+                        return false;
+                    }
+                }
+
+                // Status filter
+                if (statusFilter && incident.status !== statusFilter) {
+                    return false;
+                }
+
+                // Severity filter
+                if (severityFilter && incident.severityLevel !== severityFilter) {
+                    return false;
+                }
+
+                // Assignee filter
+                if (assigneeFilter && incident.assignee !== assigneeFilter) {
+                    return false;
+                }
+
+                // Date filters
+                if (dateFromFilter || dateToFilter) {
+                    const incidentDate = new Date(incident.createdAt).toISOString().split('T')[0];
+                    
+                    if (dateFromFilter && incidentDate < dateFromFilter) {
+                        return false;
+                    }
+                    
+                    if (dateToFilter && incidentDate > dateToFilter) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Sort incidents
+            const [sortField, sortDirection] = sortBy.split('_');
+            filteredIncidents.sort((a, b) => {
+                let valueA, valueB;
+
+                switch (sortField) {
+                    case 'createdAt':
+                        valueA = new Date(a.createdAt);
+                        valueB = new Date(b.createdAt);
+                        break;
+                    case 'severity':
+                        const severityOrder = { 'CRITICAL': 4, 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
+                        valueA = severityOrder[a.severityLevel] || 0;
+                        valueB = severityOrder[b.severityLevel] || 0;
+                        break;
+                    case 'title':
+                        valueA = a.title.toLowerCase();
+                        valueB = b.title.toLowerCase();
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (sortDirection === 'desc') {
+                    return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+                } else {
+                    return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+                }
+            });
+
+            // Update display
+            updateIncidentsTable();
+            updateFilterSummary();
+        }
+
+        // Update incidents table with filtered data
+        function updateIncidentsTable() {
+            const tableBody = document.getElementById('incidentsTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filteredIncidents.length > 0) {
+                tableBody.innerHTML = filteredIncidents.map(incident => `
+                    <tr>
+                        <td><strong>#${incident.id}</strong></td>
+                        <td>
+                            <div class="fw-semibold">${incident.title}</div>
+                            ${incident.description ? `<small class="text-muted">${incident.description.substring(0, 50)}${incident.description.length > 50 ? '...' : ''}</small>` : ''}
+                        </td>
+                        <td>
+                            <span class="badge badge-status status-${incident.status.toLowerCase()}">
+                                ${getStatusIcon(incident.status)} ${getStatusLabel(incident.status)}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-status severity-${incident.severityLevel.toLowerCase()}">
+                                ${getSeverityIcon(incident.severityLevel)} ${getSeverityLabel(incident.severityLevel)}
+                            </span>
+                        </td>
+                        <td>${incident.affectedService || '<span class="text-muted">-</span>'}</td>
+                        <td>${incident.assignee || '<span class="text-muted">-</span>'}</td>
+                        <td>${incident.reportedBy || '<span class="text-muted">-</span>'}</td>
+                        <td>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                ${formatDate(incident.createdAt)}
+                            </small>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewIncidentDetail(${incident.id})" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="openEditModal(${incident.id})" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                ${incident.status !== 'RESOLVED' ? `
+                                    <button class="btn btn-sm btn-outline-success" onclick="resolveIncident(${incident.id})" title="Giải quyết">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                emptyState.classList.add('d-none');
+                document.querySelector('.table-responsive').classList.remove('d-none');
+            } else {
+                document.querySelector('.table-responsive').classList.add('d-none');
+                emptyState.classList.remove('d-none');
+            }
+        }
+
+        // Update filter summary
+        function updateFilterSummary() {
+            const filterSummary = document.getElementById('filterSummary');
+            const filterSummaryText = document.getElementById('filterSummaryText');
+            const filteredCount = document.getElementById('filteredCount');
+
+            const hasFilters = 
+                document.getElementById('searchInput').value ||
+                document.getElementById('statusFilter').value ||
+                document.getElementById('severityFilter').value ||
+                document.getElementById('assigneeFilter').value ||
+                document.getElementById('dateFromFilter').value ||
+                document.getElementById('dateToFilter').value ||
+                document.getElementById('sortBy').value !== 'createdAt_desc';
+
+            if (hasFilters) {
+                filterSummaryText.textContent = 'Đang áp dụng bộ lọc - Hiển thị ';
+                filteredCount.textContent = `${filteredIncidents.length} / ${allIncidents.length} issue`;
+                filterSummary.style.display = 'block';
+            } else {
+                filterSummary.style.display = 'none';
+            }
+        }
+
+        // Populate assignee filter options
+        function populateAssigneeFilter() {
+            const assigneeFilter = document.getElementById('assigneeFilter');
+            const assignees = [...new Set(allIncidents.map(i => i.assignee).filter(a => a))];
+            
+            // Clear existing options (except first)
+            assigneeFilter.innerHTML = '<option value="">Tất cả người phụ trách</option>';
+            
+            assignees.forEach(assignee => {
+                const option = new Option(assignee, assignee);
+                assigneeFilter.add(option);
+            });
+        }
+
+        // Updated fetchIncidents function to work with filtering
+        function fetchIncidentsWithFilter() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            loadingSpinner.style.display = 'block';
+            
+            fetch(`${API_BASE_URL}/incidents`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingSpinner.style.display = 'none';
+                    
+                    allIncidents = data.content || [];
+                    filteredIncidents = [...allIncidents];
+                    
+                    populateAssigneeFilter();
+                    applyFilters(); // This will call updateIncidentsTable
+                })
+                .catch(error => {
+                    loadingSpinner.style.display = 'none';
+                    console.error('Error fetching incidents:', error);
+                    showToast('Lỗi khi tải danh sách issue', 'error');
+                });
         }
     </script>
 </body>

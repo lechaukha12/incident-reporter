@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý người dùng - Hệ thống Tuning OPS</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #0171bb;
+            --secondary-color: #ffde00;
+            --hover-primary: #014a8a;
+            --hover-secondary: #e6c700;
+            --bg-light: #f5f5f5;
+            --text-dark: #333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+        
+        .navbar-custom {
+            background-color: var(--secondary-color) !important;
+            padding: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-custom .navbar-brand {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        
+        .navbar-custom .nav-link {
+            color: var(--primary-color) !important;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .navbar-custom .nav-link:hover {
+            color: var(--hover-primary) !important;
+        }
+        
+        .btn-custom-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-custom-primary:hover {
+            background-color: var(--hover-primary);
+            border-color: var(--hover-primary);
+            color: white;
+        }
+        
+        .btn-custom-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-custom-secondary:hover {
+            background-color: var(--hover-secondary);
+            border-color: var(--hover-secondary);
+            color: var(--primary-color);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #025aa3 100%);
+            color: white;
+            padding: 1.5rem;
+            margin: 0;
+        }
+        
+        .table thead th {
+            background-color: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            color: var(--text-dark);
+            padding: 1rem 0.75rem;
+        }
+        
+        .table tbody tr {
+            transition: all 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .badge-status {
+            font-size: 0.75rem;
+            padding: 0.4em 0.8em;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        .role-admin {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .role-manager {
+            background-color: #fd7e14;
+            color: white;
+        }
+        
+        .role-user {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .status-active {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .status-inactive {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .status-suspended {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .modal-header-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #025aa3 100%);
+            color: white;
+            border-bottom: none;
+        }
+        
+        .modal-header-custom .btn-close {
+            filter: invert(1);
+        }
+        
+        .loading-spinner {
+            min-height: 200px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #025aa3 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-custom navbar-expand-lg">
+        <div class="container">
+            <div class="navbar-nav me-auto">
+                <span class="navbar-brand">
+                    Hệ thống Tuning OPS
+                </span>
+            </div>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link me-3" href="index.html">
+                    <i class="fas fa-list me-1"></i>
+                    Danh sách Issue
+                </a>
+                <a class="nav-link me-3" href="dashboard.html">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Dashboard
+                </a>
+                <button class="btn btn-custom-secondary" onclick="openCreateUserModal()">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Thêm người dùng
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4" id="statsContainer">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="totalUsers">0</div>
+                    <div class="stats-label">
+                        <i class="fas fa-users me-1"></i>
+                        Tổng số người dùng
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="activeUsers">0</div>
+                    <div class="stats-label">
+                        <i class="fas fa-user-check me-1"></i>
+                        Đang hoạt động
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="adminUsers">0</div>
+                    <div class="stats-label">
+                        <i class="fas fa-user-shield me-1"></i>
+                        Quản trị viên
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card">
+                    <div class="stats-number" id="totalDepartments">0</div>
+                    <div class="stats-label">
+                        <i class="fas fa-building me-1"></i>
+                        Phòng ban
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Section -->
+        <div class="search-section fade-in">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="searchInput" 
+                               placeholder="Tìm kiếm theo tên, username, email...">
+                        <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <select class="form-select" id="roleFilter">
+                                <option value="">Tất cả vai trò</option>
+                                <option value="ADMIN">Admin</option>
+                                <option value="MANAGER">Manager</option>
+                                <option value="USER">User</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="ACTIVE">Hoạt động</option>
+                                <option value="INACTIVE">Không hoạt động</option>
+                                <option value="SUSPENDED">Tạm khóa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="departmentFilter">
+                                <option value="">Tất cả phòng ban</option>
+                                <!-- Will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container fade-in">
+            <div class="table-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Danh sách người dùng
+                </h4>
+            </div>
+            <div class="p-3">
+                <!-- Loading Spinner -->
+                <div class="text-center loading-spinner" id="loadingSpinner" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+                
+                <!-- Table -->
+                <div class="table-responsive" id="usersTableContainer">
+                    <table class="table table-hover mb-0" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th width="8%">ID</th>
+                                <th width="15%">Username</th>
+                                <th width="20%">Họ tên</th>
+                                <th width="15%">Email</th>
+                                <th width="12%">Vai trò</th>
+                                <th width="10%">Trạng thái</th>
+                                <th width="10%">Phòng ban</th>
+                                <th width="10%">Hoạt động cuối</th>
+                                <th width="10%">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Empty State -->
+                <div class="text-center py-5 d-none" id="emptyState">
+                    <i class="fas fa-users text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">Không tìm thấy người dùng</h5>
+                    <p class="text-muted">Hãy thử thay đổi tiêu chí tìm kiếm hoặc thêm người dùng mới.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Thêm người dùng mới
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createUserForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    Username <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="username" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-1"></i>
+                                    Mật khẩu <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" class="form-control" id="password" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">
+                                <i class="fas fa-id-card me-1"></i>
+                                Họ tên đầy đủ <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="fullName" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope me-1"></i>
+                                    Email
+                                </label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phoneNumber" class="form-label">
+                                    <i class="fas fa-phone me-1"></i>
+                                    Số điện thoại
+                                </label>
+                                <input type="tel" class="form-control" id="phoneNumber">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="department" class="form-label">
+                                    <i class="fas fa-building me-1"></i>
+                                    Phòng ban
+                                </label>
+                                <input type="text" class="form-control" id="department">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="role" class="form-label">
+                                    <i class="fas fa-user-tag me-1"></i>
+                                    Vai trò
+                                </label>
+                                <select class="form-select" id="role">
+                                    <option value="USER">User</option>
+                                    <option value="MANAGER">Manager</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-custom-primary" onclick="createUser()">
+                        <i class="fas fa-save me-1"></i>
+                        Tạo người dùng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-edit me-2"></i>
+                        Chỉnh sửa người dùng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editFullName" class="form-label">
+                                <i class="fas fa-id-card me-1"></i>
+                                Họ tên đầy đủ <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="editFullName" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editEmail" class="form-label">
+                                    <i class="fas fa-envelope me-1"></i>
+                                    Email
+                                </label>
+                                <input type="email" class="form-control" id="editEmail">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editPhoneNumber" class="form-label">
+                                    <i class="fas fa-phone me-1"></i>
+                                    Số điện thoại
+                                </label>
+                                <input type="tel" class="form-control" id="editPhoneNumber">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editDepartment" class="form-label">
+                                    <i class="fas fa-building me-1"></i>
+                                    Phòng ban
+                                </label>
+                                <input type="text" class="form-control" id="editDepartment">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editRole" class="form-label">
+                                    <i class="fas fa-user-tag me-1"></i>
+                                    Vai trò
+                                </label>
+                                <select class="form-select" id="editRole">
+                                    <option value="USER">User</option>
+                                    <option value="MANAGER">Manager</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStatus" class="form-label">
+                                <i class="fas fa-toggle-on me-1"></i>
+                                Trạng thái
+                            </label>
+                            <select class="form-select" id="editStatus">
+                                <option value="ACTIVE">Hoạt động</option>
+                                <option value="INACTIVE">Không hoạt động</option>
+                                <option value="SUSPENDED">Tạm khóa</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-custom-primary" onclick="updateUser()">
+                        <i class="fas fa-save me-1"></i>
+                        Cập nhật
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title">
+                        <i class="fas fa-key me-2"></i>
+                        Đổi mật khẩu
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <input type="hidden" id="changePasswordUserId">
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">
+                                <i class="fas fa-lock me-1"></i>
+                                Mật khẩu mới <span class="text-danger">*</span>
+                            </label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">
+                                <i class="fas fa-lock me-1"></i>
+                                Xác nhận mật khẩu <span class="text-danger">*</span>
+                            </label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-custom-primary" onclick="changePassword()">
+                        <i class="fas fa-save me-1"></i>
+                        Đổi mật khẩu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+        
+        // Global variables
+        let allUsers = [];
+        let filteredUsers = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUserManagement();
+            fetchUsers();
+            fetchDepartments();
+        });
+        
+        // Initialize user management functionality
+        function initializeUserManagement() {
+            // Search input
+            const searchInput = document.getElementById('searchInput');
+            const clearSearch = document.getElementById('clearSearch');
+            
+            // Filter selects
+            const roleFilter = document.getElementById('roleFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            const departmentFilter = document.getElementById('departmentFilter');
+
+            // Event listeners
+            searchInput.addEventListener('input', debounce(applyFilters, 300));
+            clearSearch.addEventListener('click', () => {
+                searchInput.value = '';
+                applyFilters();
+            });
+
+            roleFilter.addEventListener('change', applyFilters);
+            statusFilter.addEventListener('change', applyFilters);
+            departmentFilter.addEventListener('change', applyFilters);
+        }
+        
+        // Fetch all users
+        function fetchUsers() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            loadingSpinner.style.display = 'flex';
+            
+            fetch(`${API_BASE_URL}/users`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingSpinner.style.display = 'none';
+                    allUsers = data;
+                    filteredUsers = [...allUsers];
+                    updateUsersTable();
+                    updateStats();
+                })
+                .catch(error => {
+                    loadingSpinner.style.display = 'none';
+                    console.error('Error fetching users:', error);
+                    showToast('Lỗi khi tải danh sách người dùng', 'error');
+                });
+        }
+        
+        // Fetch departments for filter
+        function fetchDepartments() {
+            fetch(`${API_BASE_URL}/users/departments`)
+                .then(response => response.json())
+                .then(departments => {
+                    const departmentFilter = document.getElementById('departmentFilter');
+                    departmentFilter.innerHTML = '<option value="">Tất cả phòng ban</option>';
+                    departments.forEach(dept => {
+                        const option = new Option(dept, dept);
+                        departmentFilter.add(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching departments:', error);
+                });
+        }
+        
+        // Apply filters
+        function applyFilters() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const departmentFilter = document.getElementById('departmentFilter').value;
+
+            filteredUsers = allUsers.filter(user => {
+                // Search filter
+                if (searchQuery) {
+                    const searchText = [
+                        user.username,
+                        user.fullName,
+                        user.email,
+                        user.department
+                    ].join(' ').toLowerCase();
+                    
+                    if (!searchText.includes(searchQuery)) {
+                        return false;
+                    }
+                }
+
+                // Role filter
+                if (roleFilter && user.role !== roleFilter) {
+                    return false;
+                }
+
+                // Status filter
+                if (statusFilter && user.status !== statusFilter) {
+                    return false;
+                }
+
+                // Department filter
+                if (departmentFilter && user.department !== departmentFilter) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            updateUsersTable();
+        }
+        
+        // Update users table
+        function updateUsersTable() {
+            const tableBody = document.getElementById('usersTableBody');
+            const tableContainer = document.getElementById('usersTableContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filteredUsers.length > 0) {
+                tableBody.innerHTML = filteredUsers.map(user => `
+                    <tr>
+                        <td><strong>#${user.id}</strong></td>
+                        <td>
+                            <div class="fw-semibold">${user.username}</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">${user.fullName}</div>
+                        </td>
+                        <td>${user.email || '<span class="text-muted">-</span>'}</td>
+                        <td>
+                            <span class="badge badge-status role-${user.role.toLowerCase()}">
+                                ${getRoleIcon(user.role)} ${getRoleLabel(user.role)}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-status status-${user.status.toLowerCase()}">
+                                ${getStatusIcon(user.status)} ${getStatusLabel(user.status)}
+                            </span>
+                        </td>
+                        <td>${user.department || '<span class="text-muted">-</span>'}</td>
+                        <td>
+                            <small class="text-muted">
+                                ${user.lastLoginAt ? formatDateTime(user.lastLoginAt) : 'Chưa đăng nhập'}
+                            </small>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editUser(${user.id})" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="openChangePasswordModal(${user.id})" title="Đổi mật khẩu">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-${user.status === 'ACTIVE' ? 'secondary' : 'success'}" 
+                                        onclick="toggleUserStatus(${user.id})" 
+                                        title="${user.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}">
+                                    <i class="fas fa-${user.status === 'ACTIVE' ? 'ban' : 'check'}"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id})" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                tableContainer.classList.remove('d-none');
+                emptyState.classList.add('d-none');
+            } else {
+                tableContainer.classList.add('d-none');
+                emptyState.classList.remove('d-none');
+            }
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const totalUsers = allUsers.length;
+            const activeUsers = allUsers.filter(u => u.status === 'ACTIVE').length;
+            const adminUsers = allUsers.filter(u => u.role === 'ADMIN').length;
+            const departments = [...new Set(allUsers.map(u => u.department).filter(d => d))].length;
+            
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('activeUsers').textContent = activeUsers;
+            document.getElementById('adminUsers').textContent = adminUsers;
+            document.getElementById('totalDepartments').textContent = departments;
+        }
+        
+        // Modal functions
+        function openCreateUserModal() {
+            document.getElementById('createUserForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('createUserModal'));
+            modal.show();
+        }
+        
+        function createUser() {
+            const newUser = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phoneNumber: document.getElementById('phoneNumber').value,
+                department: document.getElementById('department').value,
+                role: document.getElementById('role').value
+            };
+            
+            if (!newUser.username || !newUser.password || !newUser.fullName) {
+                showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'warning');
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
+                fetchUsers();
+                fetchDepartments();
+                showToast('Đã tạo người dùng mới thành công!', 'success');
+            })
+            .catch(error => {
+                console.error('Error creating user:', error);
+                showToast('Lỗi khi tạo người dùng', 'error');
+            });
+        }
+        
+        function editUser(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editFullName').value = user.fullName;
+            document.getElementById('editEmail').value = user.email || '';
+            document.getElementById('editPhoneNumber').value = user.phoneNumber || '';
+            document.getElementById('editDepartment').value = user.department || '';
+            document.getElementById('editRole').value = user.role;
+            document.getElementById('editStatus').value = user.status;
+            
+            const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            modal.show();
+        }
+        
+        function updateUser() {
+            const userId = document.getElementById('editUserId').value;
+            const updatedUser = {
+                fullName: document.getElementById('editFullName').value,
+                email: document.getElementById('editEmail').value,
+                phoneNumber: document.getElementById('editPhoneNumber').value,
+                department: document.getElementById('editDepartment').value,
+                role: document.getElementById('editRole').value,
+                status: document.getElementById('editStatus').value
+            };
+            
+            fetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedUser)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                fetchUsers();
+                fetchDepartments();
+                showToast('Đã cập nhật người dùng thành công!', 'success');
+            })
+            .catch(error => {
+                console.error('Error updating user:', error);
+                showToast('Lỗi khi cập nhật người dùng', 'error');
+            });
+        }
+        
+        function openChangePasswordModal(userId) {
+            document.getElementById('changePasswordUserId').value = userId;
+            document.getElementById('changePasswordForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+            modal.show();
+        }
+        
+        function changePassword() {
+            const userId = document.getElementById('changePasswordUserId').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!newPassword || newPassword !== confirmPassword) {
+                showToast('Mật khẩu xác nhận không khớp', 'warning');
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/users/${userId}/password`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newPassword: newPassword })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.text();
+            })
+            .then(() => {
+                bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                showToast('Đã đổi mật khẩu thành công!', 'success');
+            })
+            .catch(error => {
+                console.error('Error changing password:', error);
+                showToast('Lỗi khi đổi mật khẩu', 'error');
+            });
+        }
+        
+        function toggleUserStatus(userId) {
+            fetch(`${API_BASE_URL}/users/${userId}/toggle-status`, {
+                method: 'PUT'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                fetchUsers();
+                showToast('Đã cập nhật trạng thái người dùng!', 'success');
+            })
+            .catch(error => {
+                console.error('Error toggling user status:', error);
+                showToast('Lỗi khi cập nhật trạng thái', 'error');
+            });
+        }
+        
+        function deleteUser(userId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+                return;
+            }
+            
+            fetch(`${API_BASE_URL}/users/${userId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                fetchUsers();
+                fetchDepartments();
+                showToast('Đã xóa người dùng thành công!', 'success');
+            })
+            .catch(error => {
+                console.error('Error deleting user:', error);
+                showToast('Lỗi khi xóa người dùng', 'error');
+            });
+        }
+        
+        // Utility functions
+        function getRoleLabel(role) {
+            const labels = {
+                'ADMIN': 'Admin',
+                'MANAGER': 'Manager',
+                'USER': 'User'
+            };
+            return labels[role] || role;
+        }
+        
+        function getRoleIcon(role) {
+            const icons = {
+                'ADMIN': '<i class="fas fa-user-shield"></i>',
+                'MANAGER': '<i class="fas fa-user-tie"></i>',
+                'USER': '<i class="fas fa-user"></i>'
+            };
+            return icons[role] || '';
+        }
+        
+        function getStatusLabel(status) {
+            const labels = {
+                'ACTIVE': 'Hoạt động',
+                'INACTIVE': 'Không hoạt động',
+                'SUSPENDED': 'Tạm khóa'
+            };
+            return labels[status] || status;
+        }
+        
+        function getStatusIcon(status) {
+            const icons = {
+                'ACTIVE': '<i class="fas fa-check-circle"></i>',
+                'INACTIVE': '<i class="fas fa-pause-circle"></i>',
+                'SUSPENDED': '<i class="fas fa-ban"></i>'
+            };
+            return icons[status] || '';
+        }
+        
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('vi-VN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Toast function
+        function showToast(message, type = 'info') {
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toastContainer';
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '1055';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastId = 'toast-' + Date.now();
+            const bgClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : type === 'warning' ? 'bg-warning' : 'bg-primary';
+            const textClass = type === 'warning' ? 'text-dark' : 'text-white';
+            
+            const toastHtml = `
+                <div id="${toastId}" class="toast ${bgClass} ${textClass}" role="alert">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+    </script>
+</body>
+</html>
