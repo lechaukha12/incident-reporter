@@ -320,6 +320,10 @@
                     <input type="text" id="affectedService" class="form-control" required>
                 </div>
                 <div class="form-group">
+                    <label for="assignee">Người phụ trách</label>
+                    <input type="text" id="assignee" class="form-control">
+                </div>
+                <div class="form-group">
                     <label for="reportedBy">Người báo cáo</label>
                     <input type="text" id="reportedBy" class="form-control" required>
                 </div>
@@ -475,6 +479,7 @@
                 status: document.getElementById('status').value,
                 severityLevel: document.getElementById('severityLevel').value,
                 affectedService: document.getElementById('affectedService').value,
+                assignee: document.getElementById('assignee').value,
                 reportedBy: document.getElementById('reportedBy').value,
                 notes: document.getElementById('notes').value,
                 rootCause: document.getElementById('rootCause').value
@@ -567,6 +572,7 @@
                             <th>Trạng thái</th>
                             <th>Mức độ nghiêm trọng</th>
                             <th>Dịch vụ bị ảnh hưởng</th>
+                            <th>Người phụ trách</th>
                             <th>Người báo cáo</th>
                             <th>Thời gian tạo</th>
                             <th>Hành động</th>
@@ -580,6 +586,7 @@
                                 <td><span class="tag tag-${incident.status.toLowerCase()}">${getStatusLabel(incident.status)}</span></td>
                                 <td><span class="tag tag-${incident.severityLevel.toLowerCase()}">${getSeverityLabel(incident.severityLevel)}</span></td>
                                 <td>${incident.affectedService || '-'}</td>
+                                <td>${incident.assignee || '-'}</td>
                                 <td>${incident.reportedBy || '-'}</td>
                                 <td>${formatDate(incident.createdAt)}</td>
                                 <td>
