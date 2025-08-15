@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Hệ thống Tuning OPS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-yellow: #ffde00;
+            --secondary-blue: #0171bb;
+            --dark-yellow: #e6c800;
+            --light-yellow: #fff3b3;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--dark-yellow) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            margin: 20px;
+        }
+
+        .login-left {
+            background: linear-gradient(45deg, var(--primary-yellow), var(--light-yellow));
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: var(--secondary-blue);
+        }
+
+        .login-right {
+            padding: 3rem;
+        }
+
+        .brand-logo {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--secondary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .brand-subtitle {
+            font-size: 1.2rem;
+            color: var(--secondary-blue);
+            opacity: 0.8;
+        }
+
+        .login-form {
+            max-width: 400px;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-yellow);
+            box-shadow: 0 0 0 0.2rem rgba(255, 222, 0, 0.25);
+        }
+
+        .btn-login {
+            background: linear-gradient(45deg, var(--primary-yellow), var(--dark-yellow));
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            color: var(--secondary-blue);
+            width: 100%;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 222, 0, 0.4);
+            color: var(--secondary-blue);
+        }
+
+        .alert-custom {
+            background-color: #fff3cd;
+            border: 1px solid var(--primary-yellow);
+            color: var(--secondary-blue);
+            border-radius: 10px;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @media (max-width: 768px) {
+            .login-card {
+                margin: 10px;
+            }
+            .login-left {
+                padding: 2rem;
+            }
+            .login-right {
+                padding: 2rem;
+            }
+            .brand-logo {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="row g-0 h-100">
+                <!-- Left Panel -->
+                <div class="col-lg-6 login-left">
+                    <div class="brand-logo">
+                        <i class="fas fa-shield-alt me-3"></i>
+                        Tuning OPS
+                    </div>
+                    <div class="brand-subtitle mb-4">
+                        Hệ thống quản lý issue chuyên nghiệp
+                    </div>
+                    <div class="features">
+                        <div class="feature-item mb-3">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Dashboard & Analytics
+                        </div>
+                        <div class="feature-item mb-3">
+                            <i class="fas fa-users me-2"></i>
+                            User Management
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-search me-2"></i>
+                            Advanced Search & Filter
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Login Form -->
+                <div class="col-lg-6 login-right d-flex align-items-center">
+                    <div class="login-form w-100">
+                        <h2 class="text-center mb-4" style="color: var(--secondary-blue);">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Đăng nhập
+                        </h2>
+
+                        <div id="alert-container"></div>
+
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">
+                                    <i class="fas fa-user me-2"></i>Tên đăng nhập
+                                </label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>Mật khẩu
+                                </label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">
+                                    Ghi nhớ đăng nhập
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-login" id="loginBtn">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Đăng nhập
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <small class="text-muted">
+                                Liên hệ quản trị viên nếu quên mật khẩu
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = '/api';
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const alertContainer = document.getElementById('alert-container');
+
+            // Show loading state
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang đăng nhập...';
+            loginBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store auth data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Show success message
+                    showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
+                    
+                    // Redirect based on role
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    showAlert(data.message || 'Tên đăng nhập hoặc mật khẩu không đúng', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Lỗi kết nối. Vui lòng thử lại sau.', 'error');
+            } finally {
+                // Reset button
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Đăng nhập';
+                loginBtn.disabled = false;
+            }
+        });
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alert-container');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-custom';
+            
+            alertContainer.innerHTML = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+
+        // Check if already logged in
+        if (localStorage.getItem('token')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

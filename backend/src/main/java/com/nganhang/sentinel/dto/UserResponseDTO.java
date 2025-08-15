@@ -12,6 +12,7 @@ public class UserResponseDTO {
     private String department;
     private String role;
     private String status;
+    private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
     
@@ -27,6 +28,7 @@ public class UserResponseDTO {
         this.department = user.getDepartment();
         this.role = user.getRole().name();
         this.status = user.getStatus().name();
+        this.active = user.isActive();
         this.createdAt = user.getCreatedAt();
         this.lastLoginAt = user.getLastLoginAt();
     }
@@ -94,6 +96,14 @@ public class UserResponseDTO {
     
     public void setStatus(String status) {
         this.status = status;
+    }
+    
+    public boolean isActive() {
+        return active;
+    }
+    
+    public void setActive(boolean active) {
+        this.active = active;
     }
     
     public LocalDateTime getCreatedAt() {

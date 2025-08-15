@@ -2,6 +2,8 @@ FROM nginx:alpine
 
 # Sao chép tệp HTML tĩnh
 COPY ./src/index.html /usr/share/nginx/html/index.html
+COPY ./src/login.html /usr/share/nginx/html/login.html
+COPY ./src/auth.js /usr/share/nginx/html/auth.js
 COPY ./src/incident-detail.html /usr/share/nginx/html/incident-detail.html
 COPY ./src/dashboard.html /usr/share/nginx/html/dashboard.html
 COPY ./src/users.html /usr/share/nginx/html/users.html

@@ -141,6 +141,11 @@ public class User {
         this.lastLoginAt = lastLoginAt;
     }
     
+    // Helper method for authentication
+    public boolean isActive() {
+        return this.status == UserStatus.ACTIVE;
+    }
+
     // Enums
     public enum UserRole {
         ADMIN("Admin"),
