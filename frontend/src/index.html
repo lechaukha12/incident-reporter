@@ -40,6 +40,12 @@
             font-size: 1.5rem;
         }
         
+        .navbar-custom .navbar-text {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
         .btn-custom-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
@@ -245,14 +251,20 @@
     <!-- Navigation -->
     <nav class="navbar navbar-custom navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-shield-alt me-2"></i>
-                Hệ thống Tuning OPS
-            </a>
-            <button class="btn btn-custom-secondary" onclick="openCreateModal()">
-                <i class="fas fa-plus me-2"></i>
-                Tạo issue mới
-            </button>
+            <div class="navbar-nav me-auto">
+                <span class="navbar-text">
+                    Hệ thống Tuning OPS
+                </span>
+            </div>
+            <div class="navbar-brand mx-auto">
+                <span style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">NAM A BANK</span>
+            </div>
+            <div class="navbar-nav ms-auto">
+                <button class="btn btn-custom-secondary" onclick="openCreateModal()">
+                    <i class="fas fa-plus me-2"></i>
+                    Tạo issue mới
+                </button>
+            </div>
         </div>
     </nav>
 
