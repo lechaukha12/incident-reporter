@@ -11,6 +11,9 @@ COPY ./src/api-test-standalone.html /usr/share/nginx/html/api-test.html
 COPY ./src/connection-test.html /usr/share/nginx/html/connection-test.html
 COPY ./src/chart-test.html /usr/share/nginx/html/chart-test.html
 
+# Sao chép thư mục assets (CSS, JS, fonts)
+COPY ./src/assets /usr/share/nginx/html/assets
+
 # Cấu hình Nginx
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
