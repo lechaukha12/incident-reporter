@@ -49,6 +49,9 @@ public class Incident {
     @Column(name = "reported_by", nullable = false)
     private String reportedBy;
 
+    @Column(name = "department_id")
+    private Long departmentId;
+
     @Column(name = "is_resolved")
     private boolean resolved;
     

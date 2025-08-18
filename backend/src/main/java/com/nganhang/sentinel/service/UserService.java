@@ -44,6 +44,12 @@ public class UserService {
                 .map(UserResponseDTO::new);
     }
     
+    // Find user entity by username (for internal use)
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+    }
+    
     // Create new user
     public UserResponseDTO createUser(UserCreateDTO userCreateDTO) {
         // Check if username already exists
