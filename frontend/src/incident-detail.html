@@ -33,20 +33,102 @@
             padding: 1rem 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
+
         .navbar-custom .navbar-brand {
             color: var(--primary-color) !important;
             font-weight: 600;
             font-size: 1.5rem;
         }
-        
+
         .navbar-custom .navbar-text {
             color: var(--primary-color) !important;
             font-weight: 600;
             font-size: 1.1rem;
         }
         
-        .btn-custom-primary {
+        /* Navigation Standardization */
+        .navbar-nav {
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .nav-link {
+            color: var(--primary-color) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.75rem 1.25rem !important;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(1, 113, 187, 0.3);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 140px;
+            justify-content: center;
+            white-space: nowrap;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-color);
+        }
+        
+        /* User Avatar Dropdown */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), #025aa3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(1, 113, 187, 0.4);
+            border-color: white;
+        }
+        
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown .dropdown-menu {
+            border: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 0.5rem 0;
+            min-width: 180px;
+        }
+        
+        .user-dropdown .dropdown-item {
+            padding: 0.75rem 1.25rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .user-dropdown .dropdown-item:hover {
+            background: var(--bg-light);
+            color: var(--primary-color);
+        }
+        
+        .user-dropdown .dropdown-divider {
+            margin: 0.5rem 0;
+        }        .btn-custom-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
             color: white;
@@ -79,16 +161,51 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <div class="navbar-nav me-auto">
-                <a class="nav-link" href="index.html">
-                    <i class="fas fa-arrow-left me-1"></i>
-                    Quay lại danh sách
-                </a>
+            <div class="me-auto">
+                <span class="navbar-brand mb-0 h1" style="color: var(--primary-color); font-weight: bold;">
+                    <i class="fas fa-shield-alt me-2"></i>Hệ thống Tuning OPS
+                </span>
             </div>
             <div class="navbar-nav ms-auto">
-                <span class="navbar-text">
-                    Hệ thống Tuning OPS
-                </span>
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-arrow-left"></i>
+                    Quay lại danh sách
+                </a>
+                
+                <!-- User Avatar Dropdown -->
+                <div class="user-dropdown dropdown">
+                    <div class="user-avatar" data-bs-toggle="dropdown" aria-expanded="false" id="userAvatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <div class="dropdown-item-text px-3 py-2">
+                                <div class="fw-bold" id="userFullName">Đang tải...</div>
+                                <small class="text-muted" id="userRole">-</small>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="showProfile()">
+                                <i class="fas fa-user-circle"></i>
+                                Thông tin cá nhân
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="showSettings()">
+                                <i class="fas fa-cog"></i>
+                                Cài đặt
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Đăng xuất
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -223,6 +340,8 @@
             document.getElementById('errorSection').classList.remove('d-none');
             document.getElementById('errorMessage').textContent = 'Không tìm thấy ID issue trong URL.';
         } else {
+            requireAuth();
+            loadUserInfo();
             loadIncidentDetail();
         }
         
@@ -406,6 +525,107 @@
                 minute: '2-digit'
             });
         }
+        
+        // User Management Functions
+        function loadUserInfo() {
+            authFetch('/api/auth/me')
+                .then(response => response.json())
+                .then(user => {
+                    // Update user info in dropdown
+                    document.getElementById('userFullName').textContent = user.fullName || user.username;
+                    document.getElementById('userRole').textContent = user.role || 'USER';
+                    
+                    // Set avatar initial
+                    const avatar = document.getElementById('userAvatar');
+                    const initials = (user.fullName || user.username || 'U').charAt(0).toUpperCase();
+                    avatar.innerHTML = initials;
+                    avatar.style.background = getUserRoleColor(user.role);
+                })
+                .catch(error => {
+                    console.error('Error loading user info:', error);
+                    // Fallback avatar
+                    document.getElementById('userAvatar').innerHTML = '<i class="fas fa-user"></i>';
+                });
+        }
+        
+        function getUserRoleColor(role) {
+            switch(role) {
+                case 'ADMIN': return 'linear-gradient(45deg, #dc3545, #c82333)';
+                case 'MANAGER': return 'linear-gradient(45deg, #fd7e14, #e8690b)';
+                default: return 'linear-gradient(45deg, var(--primary-color), #025aa3)';
+            }
+        }
+        
+        function showProfile() {
+            alert('Chức năng đang phát triển');
+        }
+        
+        function showSettings() {
+            alert('Chức năng đang phát triển');
+        }
+        
+        function logout() {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                authFetch('/api/auth/logout', { method: 'POST' })
+                    .then(() => {
+                        localStorage.removeItem('token');
+                        window.location.href = 'login.html';
+                    })
+                    .catch(error => {
+                        console.error('Logout error:', error);
+                        // Force logout on client side
+                        localStorage.removeItem('token');
+                        window.location.href = 'login.html';
+                    });
+            }
+        }
+
+        // Authentication functions
+        function requireAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+        }
+
+        function getUserRoleColor(role) {
+            switch(role) {
+                case 'ADMIN': return 'linear-gradient(135deg, #ff6b6b, #feca57)';
+                case 'MANAGER': return 'linear-gradient(135deg, #f9ca24, #f0932b)';
+                case 'USER': return 'linear-gradient(135deg, #6c5ce7, #a29bfe)';
+                default: return 'linear-gradient(135deg, #74b9ff, #0984e3)';
+            }
+        }
+
+        async function loadUserInfo() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    const avatar = document.getElementById('userAvatar');
+                    const fullName = document.getElementById('userFullName');
+                    const role = document.getElementById('userRole');
+
+                    if (avatar && fullName && role) {
+                        avatar.style.background = getUserRoleColor(user.role);
+                        fullName.textContent = user.fullName;
+                        role.textContent = user.role;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
     </script>
+    
+    <!-- Authentication JavaScript -->
+    <script src="auth.js"></script>
 </body>
 </html>

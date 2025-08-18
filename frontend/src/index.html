@@ -71,18 +71,118 @@
             color: var(--primary-color);
         }
         
+        /* Navigation Standardization */
+        .navbar-nav {
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
         .nav-link {
             color: var(--primary-color) !important;
             font-weight: 500;
             transition: all 0.3s ease;
+            padding: 0.75rem 1.25rem !important;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(1, 113, 187, 0.3);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 140px;
+            justify-content: center;
+            white-space: nowrap;
         }
         
         .nav-link:hover {
-            color: var(--hover-primary) !important;
-            text-decoration: none;
+            color: var(--primary-color) !important;
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-color);
         }
         
-        .stats-card {
+        .nav-link.active {
+            background: var(--primary-color);
+            color: white !important;
+            border-color: var(--primary-color);
+        }
+        
+        .btn-create-issue {
+            background: linear-gradient(45deg, var(--primary-color), #025aa3);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+        
+        .btn-create-issue:hover {
+            background: linear-gradient(45deg, #025aa3, #014080);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(1, 113, 187, 0.3);
+            color: white;
+        }
+        
+        /* User Avatar Dropdown */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), #025aa3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(1, 113, 187, 0.4);
+            border-color: white;
+        }
+        
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown .dropdown-menu {
+            border: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 0.5rem 0;
+            min-width: 180px;
+        }
+        
+        .user-dropdown .dropdown-item {
+            padding: 0.75rem 1.25rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .user-dropdown .dropdown-item:hover {
+            background: var(--bg-light);
+            color: var(--primary-color);
+        }
+        
+        .user-dropdown .dropdown-divider {
+            margin: 0.5rem 0;
+        }        .stats-card {
             background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
             border: none;
             border-radius: 12px;
@@ -269,24 +369,59 @@
     <!-- Navigation -->
     <nav class="navbar navbar-custom navbar-expand-lg">
         <div class="container">
-            <div class="navbar-nav me-auto">
-                <span class="navbar-text">
-                    Hệ thống Tuning OPS
+            <div class="me-auto">
+                <span class="navbar-brand mb-0 h1" style="color: var(--primary-color); font-weight: bold;">
+                    <i class="fas fa-shield-alt me-2"></i>Hệ thống Tuning OPS
                 </span>
             </div>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link me-3" href="dashboard.html">
-                    <i class="fas fa-chart-bar me-1"></i>
+                <a class="nav-link" href="dashboard.html">
+                    <i class="fas fa-chart-bar"></i>
                     Dashboard
                 </a>
-                <a class="nav-link me-3" href="users.html">
-                    <i class="fas fa-users me-1"></i>
+                <a class="nav-link" href="users.html">
+                    <i class="fas fa-users"></i>
                     Người dùng
                 </a>
-                <button class="btn btn-custom-secondary" onclick="openCreateIncidentModal()">
-                    <i class="fas fa-plus me-2"></i>
+                <button class="btn btn-create-issue" onclick="openCreateIncidentModal()">
+                    <i class="fas fa-plus"></i>
                     Tạo issue mới
                 </button>
+                
+                <!-- User Avatar Dropdown -->
+                <div class="user-dropdown dropdown">
+                    <div class="user-avatar" data-bs-toggle="dropdown" aria-expanded="false" id="userAvatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <div class="dropdown-item-text px-3 py-2">
+                                <div class="fw-bold" id="userFullName">Đang tải...</div>
+                                <small class="text-muted" id="userRole">-</small>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="showProfile()">
+                                <i class="fas fa-user-circle"></i>
+                                Thông tin cá nhân
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="showSettings()">
+                                <i class="fas fa-cog"></i>
+                                Cài đặt
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Đăng xuất
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -700,6 +835,8 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            requireAuth();
+            loadUserInfo();
             fetchStats();
             initializeSearchAndFilter();
             fetchIncidentsWithFilter();
@@ -1229,6 +1366,60 @@
                     console.error('Error fetching incidents:', error);
                     showToast('Lỗi khi tải danh sách issue', 'error');
                 });
+        }
+        
+        // User Management Functions
+        function loadUserInfo() {
+            authFetch('/api/auth/me')
+                .then(response => response.json())
+                .then(user => {
+                    // Update user info in dropdown
+                    document.getElementById('userFullName').textContent = user.fullName || user.username;
+                    document.getElementById('userRole').textContent = user.role || 'USER';
+                    
+                    // Set avatar initial
+                    const avatar = document.getElementById('userAvatar');
+                    const initials = (user.fullName || user.username || 'U').charAt(0).toUpperCase();
+                    avatar.innerHTML = initials;
+                    avatar.style.background = getUserRoleColor(user.role);
+                })
+                .catch(error => {
+                    console.error('Error loading user info:', error);
+                    // Fallback avatar
+                    document.getElementById('userAvatar').innerHTML = '<i class="fas fa-user"></i>';
+                });
+        }
+        
+        function getUserRoleColor(role) {
+            switch(role) {
+                case 'ADMIN': return 'linear-gradient(45deg, #dc3545, #c82333)';
+                case 'MANAGER': return 'linear-gradient(45deg, #fd7e14, #e8690b)';
+                default: return 'linear-gradient(45deg, var(--primary-color), #025aa3)';
+            }
+        }
+        
+        function showProfile() {
+            showToast('Chức năng đang phát triển', 'info');
+        }
+        
+        function showSettings() {
+            showToast('Chức năng đang phát triển', 'info');
+        }
+        
+        function logout() {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                authFetch('/api/auth/logout', { method: 'POST' })
+                    .then(() => {
+                        localStorage.removeItem('authToken');
+                        window.location.href = 'login.html';
+                    })
+                    .catch(error => {
+                        console.error('Logout error:', error);
+                        // Force logout on client side
+                        localStorage.removeItem('authToken');
+                        window.location.href = 'login.html';
+                    });
+            }
         }
     </script>
     

@@ -63,31 +63,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Add user info to navbar if available
-    const user = getCurrentUser();
-    if (user) {
-        addUserInfoToNavbar(user);
-    }
+    // User info is now handled by individual pages' loadUserInfo() function
+    // No need to add user info to navbar here anymore
 });
 
-function addUserInfoToNavbar(user) {
-    // Find navbar nav element
-    const navbarNav = document.querySelector('.navbar-nav.ms-auto');
-    if (navbarNav) {
-        // Add user dropdown
-        const userDropdown = document.createElement('div');
-        userDropdown.className = 'nav-item dropdown';
-        userDropdown.innerHTML = `
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                <i class="fas fa-user me-1"></i>${user.fullName || user.username}
-            </a>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
-            </ul>
-        `;
-        navbarNav.appendChild(userDropdown);
-    }
-}
+// Note: addUserInfoToNavbar function removed 
+// User info is now handled by individual pages with round avatars
